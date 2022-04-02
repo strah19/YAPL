@@ -42,7 +42,8 @@ enum {
  */
 Lexer::Lexer(const char* filepath) {
     stream = load(filepath, &size);
-    tokens = Vec<Token>();
+
+    backtrack_symbol_pos = 0;
 
     keywords.insert("if", Tok::T_IF);
     keywords.insert("else", Tok::T_ELSE);
@@ -103,18 +104,30 @@ void Lexer::singleline_comment() {
 }
 
 void Lexer::multiline_comment() {
-    static uint32_t nested_comment = 0;
-
     if (*stream == '{' && incr_char() == '-') {
         nested_comment++;
         current_type = MULTI_LINE_COMMENT;
         move();
     }
-    else if(*stream == '-' && incr_char() == '}') {
+    else if (*stream == '-' && incr_char() == '}') {
         nested_comment--;
         current_type = (nested_comment == 0) ? 0 : current_type;
         move();
     }
+}
+
+void Lexer::create_sym_token() {
+    for (int i = 0; i < current.size(); i++) {
+        Entry* ent = symbols.look_up(&current[0]);
+        if (ent) {
+            tokens.push(Token(ent->type, current_line));
+            stream = backtrack_symbol_pos + i + 2;
+            return;
+        }
+    }
+
+    tokens.push(Token(current[0], current_line));
+    stream = backtrack_symbol_pos + 1;    
 }
 
 void Lexer::reset() {
@@ -139,33 +152,32 @@ void Lexer::move() {
  * This is the run function. Will use the data from the filepath.
  */
 void Lexer::run() {
-    while (counter < size - 1) {
-        multiline_comment();
-
+    while (counter < size) {
+        singleline_comment();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
-            singleline_comment();
-
             if (current_type == IDENTIFIER && !is_identifier(*stream)) {
                 Entry* ent = keywords.look_up(&current[0]);
                 if (ent) {
-                    printf("OH NO!\n");
-                    tokens.push(Token(current_type, current_line));
+                    tokens.push(Token(ent->type, current_line));
                     reset();
                 }
                 else if (!isdigit(*stream)) {
-                    printf("GOOD! %d %d\n", counter, size);
                     tokens.push(Token(Tok::T_IDENTIFIER, current_line));
-                    printf("size: %d\n", tokens.size());
                 
                     tokens[tokens.size() - 1].identifier = new char[current.size()];
-                    tokens[tokens.size() - 1].identifier = current.array();
-
+                    strcpy(tokens[tokens.size() - 1].identifier, &current[0]);
                     reset();
-
-                    for (int i = 0; i < tokens.size(); i++) {
-                        printf("%s\n", tokens[i].identifier);
-                    }
                 }
+            }
+            else if (!isdigit(*stream) && current_type == NUMERIC) {
+                tokens.push(Token(Tok::T_INT_CONST, current_line));
+                tokens[tokens.size() - 1].int_const = atoi(&current[0]);
+
+                reset();
+            }
+            else if (current_type == SYMBOL && get_type(*stream) != SYMBOL) {
+                create_sym_token();
+                reset();
             }
             if (!is_spec_char(*stream)) {
                 if (current.size() > 0)
@@ -174,13 +186,19 @@ void Lexer::run() {
                 current.push('\0');
                 if (current.size() == 2) {
                     current_type = get_type(*stream);
+
+                    if (current_type == SYMBOL) {
+                        backtrack_symbol_pos = stream;
+                    }
                 }
-            }
+            }      
         }
 
+        multiline_comment();
         newline();  //Check for newline.
         move();
     }
+    tokens.push(Token(Tok::T_EOF, current_line));
 }
 
 /**
@@ -209,6 +227,14 @@ void Lexer::log_token(Token& token, uint32_t i) {
  * @param Token The token.
  */
 void Lexer::print_type(Token& token) {
+    Entry* ent = keywords.look_up_by_type(token.type);
+    if (ent)
+        printf("%s", ent->name);
+
+    ent = symbols.look_up_by_type(token.type);
+    if (ent)
+        printf("%s", ent->name);
+
     switch (token.type) {
     case Tok::T_IDENTIFIER: {
         printf("%s", token.identifier);
@@ -216,10 +242,16 @@ void Lexer::print_type(Token& token) {
     }
     case Tok::T_INT_CONST: {
         printf("%d", token.int_const);
+        break;
+    }
+    case Tok::T_EOF: {
+        printf("EOF");
+        break;
     }
     default: {
         if (token.type < Tok::T_EOF)
             printf("%c", token.type);
+        break;
     }
     }
 }

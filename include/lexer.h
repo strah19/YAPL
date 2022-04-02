@@ -75,12 +75,12 @@ struct Token {
     int type = 0;
     uint32_t line = 0;
 
-  //  union {
+    union {
         int int_const;
         float float_const;
         char char_const;
         char* identifier;
-  //  };
+    };
 };
 
 class Lexer {
@@ -104,6 +104,7 @@ private:
     bool is_spec_char(char c);
     void remove_whitespaces(char* s);
 
+    void create_sym_token();
     void move();
     uint32_t get_type(char c);
     void reset();
@@ -118,6 +119,9 @@ public:
     uint8_t* stream = nullptr;
     uint32_t size = 0;
     
+    uint8_t* backtrack_symbol_pos = 0;
+    uint32_t nested_comment = 0;
+
     uint32_t counter = 0;
     uint32_t current_line = 1;
 };

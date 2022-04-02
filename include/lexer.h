@@ -97,7 +97,8 @@ private:
     uint8_t* load(const char* filepath, uint32_t* size);
 
     void newline();
-    void multiline_comment();
+    void multiline_comment_beg();
+    void multiline_comment_end();
     void singleline_comment();
     char incr_char(int32_t off = 1); //Get a character from a specifc offset, initally it is just 1.
     bool is_identifier(char c);

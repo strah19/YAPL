@@ -103,13 +103,16 @@ void Lexer::singleline_comment() {
     }   
 }
 
-void Lexer::multiline_comment() {
-    if (*stream == '{' && incr_char() == '-') {
+void Lexer::multiline_comment_beg() {
+    if (*stream == '<' && incr_char() == '/') {
         nested_comment++;
         current_type = MULTI_LINE_COMMENT;
         move();
     }
-    else if (*stream == '-' && incr_char() == '}') {
+}
+
+void Lexer::multiline_comment_end() {
+    if (*stream == '/' && incr_char() == '>') {
         nested_comment--;
         current_type = (nested_comment == 0) ? 0 : current_type;
         move();
@@ -152,8 +155,9 @@ void Lexer::move() {
  * This is the run function. Will use the data from the filepath.
  */
 void Lexer::run() {
-    while (counter < size) {
+    while (*stream != '\0') {
         singleline_comment();
+        multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
             if (current_type == IDENTIFIER && !is_identifier(*stream)) {
                 Entry* ent = keywords.look_up(&current[0]);
@@ -193,8 +197,7 @@ void Lexer::run() {
                 }
             }      
         }
-
-        multiline_comment();
+        multiline_comment_end();
         newline();  //Check for newline.
         move();
     }
@@ -267,6 +270,9 @@ uint8_t* Lexer::load(const char* filepath, uint32_t* size) {
             stream = (uint8_t *) malloc(st.st_size);
             *size = st.st_size;
             fread((void*) stream, 1, st.st_size, file);
+            
+            if ((char)stream[*size - 2] != '\n')
+                fatal_error("file '%s' needs to end with a new line ('\\n').\n", filepath);
         }
         else 
             fatal_error("failed to load stats of input file.\n");

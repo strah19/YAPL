@@ -13,4 +13,3 @@ file(GLOB SOURCES "src/*.cpp")
 add_executable(YAPL ${SOURCES})
 
 target_include_directories(YAPL PUBLIC "${PROJECT_BINARY_DIR}/include")
-

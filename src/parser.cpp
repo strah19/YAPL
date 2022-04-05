@@ -17,21 +17,45 @@
 
 #include "parser.h"
 
-Parser::Parser(Vec<Token>* tokens) : tokens(tokens) { }
+#include <stdio.h>
+#include <stdlib.h>
 
-Ast* Parser::default_ast(Ast* ast) {
-    ast->line = peek()->line;
-    return ast;
-}
+Parser::Parser(Vec<Token>* tokens) : tokens(tokens) { }
 
 void Parser::run() {
 
 }
 
 Token* Parser::peek() {
-
+    return &tokens->array()[current];
 }
 
 Token* Parser::advance() {
+    return ((!is_end()) ? &tokens->array()[current++] : &tokens->array()[current]);
+}
 
+Ast* Parser::default_ast(Ast* ast) {
+    ast->line = peek()->line;
+    return ast;
+}
+
+void Parser::match(int type) {
+    if (peek()->type == type) 
+        advance();
+    else {
+        begin_custom_error();
+
+        printf("expected ");
+        Lexer::print_from_type(type);
+        printf(" but found '");
+        Lexer::print_token(*peek());
+        printf("'.\n");
+
+        end_custom_error();
+        exit(EXIT_FAILURE);
+    }
+}
+
+bool Parser::is_end() {
+    return (current == tokens->size() - 1);
 }

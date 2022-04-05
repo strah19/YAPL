@@ -19,7 +19,8 @@ public:
     Token* peek();
     Token* advance();
 
-    bool end();
+    void match(int type);
+    bool is_end();
 private:
     Ast_Expression* expression();
 private:

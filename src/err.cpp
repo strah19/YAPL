@@ -49,3 +49,11 @@ void report_error(const char* fmt, ...) {
 
     va_end(args);
 }
+
+void begin_custom_error() {
+    printf("\033[1;33m");
+}
+
+void end_custom_error() {
+    printf("\033[0m");
+}

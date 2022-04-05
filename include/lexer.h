@@ -90,7 +90,9 @@ public:
     void log();
 
     void log_token(Token& token, uint32_t i);
-    void print_type(Token& token);
+    static void print_token(Token& token);
+    static void print_from_type(int type);
+
     Vec<Token>* fetch_tokens() { return &tokens; }
 
     inline uint32_t lines() const { return current_line; }

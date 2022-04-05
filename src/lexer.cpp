@@ -220,7 +220,7 @@ void Lexer::log() {
  */
 void Lexer::log_token(Token& token, uint32_t i) {
     printf("token #%d of type %d: '", i, token.type);
-    print_type(token);
+    print_token(token);
     printf("' on line %d.\n", token.line);
 }
 
@@ -229,7 +229,7 @@ void Lexer::log_token(Token& token, uint32_t i) {
  * 
  * @param Token The token.
  */
-void Lexer::print_type(Token& token) {
+void Lexer::print_token(Token& token) {
     Entry* ent = keywords.look_up_by_type(token.type);
     if (ent)
         printf("%s", ent->name);
@@ -254,6 +254,36 @@ void Lexer::print_type(Token& token) {
     default: {
         if (token.type < Tok::T_EOF)
             printf("%c", token.type);
+        break;
+    }
+    }
+}
+
+void Lexer::print_from_type(int type) {
+    Entry* ent = keywords.look_up_by_type(type);
+    if (ent)
+        printf("%s", ent->name);
+
+    ent = symbols.look_up_by_type(type);
+    if (ent)
+        printf("%s", ent->name);
+
+    switch (type) {
+    case Tok::T_IDENTIFIER: {
+        printf("identifier");
+        break;
+    }
+    case Tok::T_INT_CONST: {
+        printf("int-const");
+        break;
+    }
+    case Tok::T_EOF: {
+        printf("EOF");
+        break;
+    }
+    default: {
+        if (type < Tok::T_EOF)
+            printf("%c", type);
         break;
     }
     }

@@ -267,9 +267,10 @@ uint8_t* Lexer::load(const char* filepath, uint32_t* size) {
         struct stat st;
 
         if (fstat(fileno(file), &st) != -1) {
-            stream = (uint8_t *) malloc(st.st_size);
+            stream = (uint8_t *) malloc(st.st_size + 1);
             *size = st.st_size;
             fread((void*) stream, 1, st.st_size, file);
+            stream[*size] = '\0';
             
             if ((char)stream[*size - 2] != '\n')
                 fatal_error("file '%s' needs to end with a new line ('\\n').\n", filepath);

@@ -19,6 +19,7 @@
 #include "lexer.h"
 #include "vec.h"
 #include "bench.h"
+#include "parser.h"
 
 int main() {
     Lexer lex("../tests/3.25.22/lexical_test.yapl");
@@ -29,6 +30,8 @@ int main() {
     lex.log();
     end_debug_benchmark("lexer");
     printf("finished lexing %d lines of code...\n", lex.lines());
+    
+    Parser parser(lex.fetch_tokens());
 
     return 0;
 }

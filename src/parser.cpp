@@ -19,3 +19,19 @@
 
 Parser::Parser(Vec<Token>* tokens) : tokens(tokens) { }
 
+Ast* Parser::default_ast(Ast* ast) {
+    ast->line = peek()->line;
+    return ast;
+}
+
+void Parser::run() {
+
+}
+
+Token* Parser::peek() {
+
+}
+
+Token* Parser::advance() {
+
+}

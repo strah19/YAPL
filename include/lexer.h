@@ -91,6 +91,7 @@ public:
 
     void log_token(Token& token, uint32_t i);
     void print_type(Token& token);
+    Vec<Token>* fetch_tokens() { return &tokens; }
 
     inline uint32_t lines() const { return current_line; }
 private:

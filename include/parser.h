@@ -2,34 +2,29 @@
 #define PARSER_H
 
 #include "lexer.h"
+#include "ast.h"
 
-struct Ast_Expression;
-
-enum {
-    AST_ID,
-    AST_EXPRESSION,
-    ASY_UNARY,
-    AST_PRIMARY,
-    AST_BINARY,
-    AST_ASSIGNMENT,
-    AST_STATEMENT
-};
-
-#define AST_DELETE(type) delete type
-
-#define AST_CAST(type, base) static_cast<type*>(base)
+#define AST_NEW(type) \
+    static_cast<type*>(default_ast(new type))
 
 class Parser {
 public:
     Parser() = default;
     Parser(Vec<Token>* tokens);
 
+	Ast* default_ast(Ast* ast);
+
     void run();
 
     Token* peek();
     Token* advance();
+
+    bool end();
+private:
+    Ast_Expression* expression();
 private:
     Vec<Token>* tokens = nullptr;
+    uint32_t current = 0;
 };
 
 #endif // !PARSER_H

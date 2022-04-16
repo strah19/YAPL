@@ -14,6 +14,7 @@
  * 
  * Is the entry point for this project.
  */
+
 #include <stdio.h>
 #include "config.h"
 #include "lexer.h"
@@ -21,8 +22,10 @@
 #include "bench.h"
 #include "parser.h"
 
-int main() {
-    Lexer lex("../tests/3.25.22/lexical_test.yapl");
+int main(int argc, char* argv[]) {
+    if (!argv[1])
+        fatal_error("no input file found.\n");
+    Lexer lex(argv[1]);
 
     printf("started lexing...\n");
     begin_debug_benchmark();
@@ -32,6 +35,8 @@ int main() {
     printf("finished lexing %d lines of code...\n", lex.lines());
     
     Parser parser(lex.fetch_tokens());
+    parser.run();
+    parser.visualize();
 
     return 0;
 }

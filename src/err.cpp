@@ -51,7 +51,7 @@ void report_error(const char* fmt, ...) {
 }
 
 void begin_custom_error() {
-    printf("\033[1;33m");
+    printf("\033[0;31m");
 }
 
 void end_custom_error() {

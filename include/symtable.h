@@ -2,6 +2,7 @@
 #define SYMTABLE_H
 
 #include "vec.h"
+#include "common.h"
 
 struct Entry {
     const char* name;

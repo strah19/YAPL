@@ -11,7 +11,6 @@ template <typename T>
 class Vec {
 public:
     Vec(Lint init_cap = 100);
-    Vec(const T datas[]);
     ~Vec();
 
     Lint push(const T& data);
@@ -32,12 +31,6 @@ private:
 
 template <typename T>
 Vec<T>::Vec(Lint init_cap) : cap(init_cap), arr(new T[init_cap]), len(0) { }
-
-template <typename T>
-Vec<T>::Vec(const T datas[]) : cap((sizeof(datas) / sizeof(datas[0])) + 1), arr(new T[cap]), len(0) {
-    for (int i = 0; i < cap; i++) 
-        push(datas[i]);
-}
 
 template <typename T>
 Vec<T>::~Vec() {

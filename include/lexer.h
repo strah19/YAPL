@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <stdint.h>
+#include "common.h"
 #include "vec.h"
 
 namespace Tok {

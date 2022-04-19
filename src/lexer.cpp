@@ -21,6 +21,7 @@
 #include <ctype.h>
 
 #include "lexer.h"
+#include "err.h"
 #include "symtable.h"
 
 static SymTable keywords;
@@ -121,15 +122,15 @@ void Lexer::multiline_comment_end() {
 
 void Lexer::create_sym_token() {
     for (int i = 0; i < current.size(); i++) {
-        Entry* ent = symbols.look_up(&current[0]);
+        Entry* ent = symbols.look_up(current.c_str());
         if (ent) {
-            tokens.push(Token(ent->type, current_line));
+            tokens.push_back(Token(ent->type, current_line));
             stream = backtrack_symbol_pos + i + 2;
             return;
         }
     }
 
-    tokens.push(Token(current[0], current_line));
+    tokens.push_back(Token(current[0], current_line));
     stream = backtrack_symbol_pos + 1;    
 }
 
@@ -160,22 +161,22 @@ void Lexer::run() {
         multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
             if (current_type == IDENTIFIER && !is_identifier(*stream)) {
-                Entry* ent = keywords.look_up(&current[0]);
+                Entry* ent = keywords.look_up(current.c_str());
                 if (ent) {
-                    tokens.push(Token(ent->type, current_line));
+                    tokens.push_back(Token(ent->type, current_line));
                     reset();
                 }
                 else if (!isdigit(*stream)) {
-                    tokens.push(Token(Tok::T_IDENTIFIER, current_line));
+                    tokens.push_back(Token(Tok::T_IDENTIFIER, current_line));
                 
                     tokens[tokens.size() - 1].identifier = new char[current.size()];
-                    strcpy(tokens[tokens.size() - 1].identifier, &current[0]);
+                    strcpy(tokens[tokens.size() - 1].identifier, current.c_str());
                     reset();
                 }
             }
             else if (!isdigit(*stream) && current_type == NUMERIC) {
-                tokens.push(Token(Tok::T_INT_CONST, current_line));
-                tokens[tokens.size() - 1].int_const = atoi(&current[0]);
+                tokens.push_back(Token(Tok::T_INT_CONST, current_line));
+                tokens[tokens.size() - 1].int_const = atoi(current.c_str());
 
                 reset();
             }
@@ -184,11 +185,8 @@ void Lexer::run() {
                 reset();
             }
             if (!is_spec_char(*stream)) {
-                if (current.size() > 0)
-                    current.pop();
-                current.push(*stream);
-                current.push('\0');
-                if (current.size() == 2) {
+                current.push_back(*stream);
+                if (current.size() == 1) {
                     current_type = get_type(*stream);
 
                     if (current_type == SYMBOL) {
@@ -201,7 +199,7 @@ void Lexer::run() {
         newline();  //Check for newline.
         move();
     }
-    tokens.push(Token(Tok::T_EOF, current_line));
+    tokens.push_back(Token(Tok::T_EOF, current_line));
 }
 
 /**

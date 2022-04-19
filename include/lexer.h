@@ -2,7 +2,9 @@
 #define LEXER_H
 
 #include "common.h"
-#include "vec.h"
+
+#include <string>
+#include <vector>
 
 namespace Tok {
     enum {
@@ -93,7 +95,7 @@ public:
     static void print_token(Token& token);
     static void print_from_type(int type);
 
-    Vec<Token>* fetch_tokens() { return &tokens; }
+    std::vector<Token>* fetch_tokens() { return &tokens; }
 
     inline uint32_t lines() const { return current_line; }
 private:
@@ -113,10 +115,10 @@ private:
     uint32_t get_type(char c);
     void reset();
 public:
-    Vec<Token> tokens;
+    std::vector<Token> tokens;
     const char* filepath = nullptr;
 
-    String current;
+    std::string current;
 
     uint32_t current_type = 0;
 

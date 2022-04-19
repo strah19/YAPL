@@ -18,9 +18,9 @@
 #include <stdio.h>
 #include "config.h"
 #include "lexer.h"
-#include "vec.h"
 #include "bench.h"
 #include "parser.h"
+#include "err.h"
 
 int main(int argc, char* argv[]) {
     if (!argv[1])

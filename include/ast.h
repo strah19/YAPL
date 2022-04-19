@@ -3,12 +3,15 @@
 
 #include "common.h"
 
+#include <vector>
+
 enum {
     AST_ID,
     AST_EXPRESSION,
     AST_UNARY,
     AST_PRIMARY,
     AST_BINARY,
+    AST_DECLERATION,
     AST_ASSIGNMENT,
     AST_STATEMENT,
     AST_TRANSLATION_UNIT
@@ -39,6 +42,12 @@ enum {
 
 struct Ast {
 	int type = 0;
+
+    void* operator new(size_t size);
+    void* operator new[](size_t size);
+
+    void operator delete(void* chunk);
+    void operator delete[](void* chunk);
 };
 
 struct Ast_Identifier : public Ast {
@@ -52,7 +61,6 @@ struct Ast_Expression : Ast {
 
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
-    ~Ast_PrimaryExpression();
 
     double int_const = 0.0;
     Ast_Identifier* ident = nullptr;
@@ -62,7 +70,6 @@ struct Ast_PrimaryExpression : public Ast_Expression {
 struct Ast_BinaryExpression : public Ast_Expression {
     Ast_BinaryExpression() { type = AST_BINARY; }
     Ast_BinaryExpression(Ast_Expression* left, int op, Ast_Expression* right) : left(left), op(op), right(right) { type = AST_BINARY; }
-    ~Ast_BinaryExpression();
 
     int op = AST_OPERATOR_NONE;
 
@@ -79,17 +86,32 @@ struct Ast_BinaryExpression : public Ast_Expression {
 struct Ast_UnaryExpression : public Ast_Expression {
     Ast_UnaryExpression() { type = AST_UNARY; }
     Ast_UnaryExpression(Ast_Expression* next, int op) : op(op), next(next) { type = AST_UNARY; }
-    ~Ast_UnaryExpression();
 
     Ast_Expression* next = nullptr;
     int op = AST_UNARY_NONE;
 };
 
-struct Ast_TranslationUnit : public Ast {
-    Ast_TranslationUnit() { type = AST_TRANSLATION_UNIT; }
-    ~Ast_TranslationUnit();
+struct Ast_Decleration : public Ast {
+    Ast_Decleration() { type = AST_DECLERATION; }
+};
+
+struct Ast_Statement : public Ast_Decleration {
+    Ast_Statement() { type = AST_STATEMENT; }
 
     Ast_Expression* expression = nullptr;
+};
+
+struct Ast_Assignment : public Ast_Decleration {
+    Ast_Assignment() { type = AST_ASSIGNMENT; }
+
+    Ast_Identifier* ident = nullptr;
+    Ast_Expression* expression = nullptr;
+};
+
+struct Ast_TranslationUnit : public Ast {
+    Ast_TranslationUnit() { type = AST_TRANSLATION_UNIT; }
+
+    std::vector<Ast_Decleration*> declerations;
 };
 
 #define AST_DELETE(type) delete type

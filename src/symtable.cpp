@@ -40,7 +40,7 @@ int SymTable::get_index(const char* name) {
 Entry* SymTable::insert(const char* name, int type) {
     Entry* e = look_up_type(name, type);
     if (e == nullptr) {
-        table.push({name, type});
+        table.push_back({name, type});
         return &table[table.size() - 1];
     }
     return e;

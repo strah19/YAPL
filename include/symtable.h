@@ -1,8 +1,8 @@
 #ifndef SYMTABLE_H
 #define SYMTABLE_H
 
-#include "vec.h"
 #include "common.h"
+#include <vector>
 
 struct Entry {
     const char* name;
@@ -18,7 +18,7 @@ public:
     Entry* look_up_type(const char* name, int type);
     Entry* look_up_by_type(int type);
 private:
-    Vec<Entry> table;
+    std::vector<Entry> table;
 };
 
 #endif // !SYMTABLE_H

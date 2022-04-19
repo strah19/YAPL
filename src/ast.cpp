@@ -16,21 +16,22 @@
  */
 
 #include "ast.h"
+#include "mem.h"
 
-Ast_TranslationUnit::~Ast_TranslationUnit() {
-    delete expression;
+static MemoryManager memory_manager;
+
+void* Ast::operator new (size_t size) {
+    memory_manager.alloc(size);
 }
 
-Ast_UnaryExpression::~Ast_UnaryExpression() {
-    delete next;
+void* Ast::operator new[] (size_t size) {
+    memory_manager.alloc(size);
 }
 
-Ast_BinaryExpression::~Ast_BinaryExpression() {
-    delete left;
-    delete right;
+void Ast::operator delete (void* chunk) {
+    memory_manager.free(chunk);
 }
 
-Ast_PrimaryExpression::~Ast_PrimaryExpression() {
-    delete ident;
-    delete nested;
+void Ast::operator delete[] (void* chunk) {
+    memory_manager.free(chunk);
 }

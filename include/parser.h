@@ -8,7 +8,7 @@
 class Parser {
 public:
     Parser() = default;
-    Parser(Vec<Token>* tokens);
+    Parser(std::vector<Token>* tokens);
     ~Parser();
 
     void run();
@@ -34,10 +34,12 @@ private:
 
     Ast_Identifier* identifier();
 
+    Ast_Decleration* decleration();
+
     int token_to_ast(Token* token);
     void ident(int indent);
 private:
-    Vec<Token>* tokens = nullptr;
+    std::vector<Token> tokens;
     uint32_t current = 0;
     Ast_TranslationUnit* root = nullptr;
 };

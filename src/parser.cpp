@@ -16,11 +16,12 @@
  */
 
 #include "parser.h"
+#include "err.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-Parser::Parser(Vec<Token>* tokens) : tokens(tokens) { 
+Parser::Parser(std::vector<Token>* tokens) : tokens(*tokens) { 
     root =  new Ast_TranslationUnit;
     current = 0;
 }
@@ -29,19 +30,23 @@ Parser::~Parser() {
     delete root;
 }
 
-void Parser::run() {
+void Parser::parse() {
     while (!is_end()) {
-        root->expression = expression();
+        auto dec = decleration();
+
+        if (dec)
+            root->declerations.push_back(dec);
+
         match(Tok::T_SEMI);
     }
 }
 
 Token* Parser::peek() {
-    return &tokens->array()[current];
+    return &tokens[current];
 }
 
 Token* Parser::advance() {
-    return ((!is_end()) ? &tokens->array()[current++] : &tokens->array()[current]);
+    return ((!is_end()) ? &tokens[current++] : &tokens[current]);
 }
 
 void Parser::match(int type) {
@@ -71,7 +76,11 @@ bool Parser::check(int type) {
 }
 
 bool Parser::is_end() {
-    return (current == tokens->size() - 1);
+    return (current == tokens.size() - 1);
+}
+
+Ast_Decleration* Parser::decleration() {
+    return nullptr;
 }
 
 Ast_Expression* Parser::expression() {
@@ -82,7 +91,7 @@ Ast_Expression* Parser::equality() {
     auto expr = comparison();
 
     while (check(Tok::T_COMPARE_EQUAL) || check(Tok::T_NOT_EQUAL)) {
-        auto tok = tokens->array()[current - 1];
+        auto tok = tokens[current - 1];
         auto right = comparison();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
     }
@@ -94,7 +103,7 @@ Ast_Expression* Parser::comparison() {
     auto expr = term();
 
     while (check(Tok::T_LTE) || check(Tok::T_GTE) || check(Tok::T_LARROW) || check(Tok::T_RARROW)) {
-        auto tok = tokens->array()[current - 1];
+        auto tok = tokens[current - 1];
         auto right = term();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
     }
@@ -106,7 +115,7 @@ Ast_Expression* Parser::term() {
     auto expr = factor();
 
     while (check(Tok::T_PLUS) || check(Tok::T_MINUS)) {
-        auto tok = tokens->array()[current - 1];
+        auto tok = tokens[current - 1];
         auto right = factor();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
     }
@@ -118,7 +127,7 @@ Ast_Expression* Parser::factor() {
     auto expr = unary();
     
     while (check(Tok::T_SLASH) || check(Tok::T_STAR)) {
-        auto tok = tokens->array()[current - 1];
+        auto tok = tokens[current - 1];
         auto right = unary();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
     }
@@ -183,10 +192,7 @@ int Parser::token_to_ast(Token* token) {
 }
 
 void Parser::visualize() {
-    if (root) {
-        if (root->expression)
-            visualize_expression(root->expression);
-    }
+
 }
 
 void Parser::visualize_expression(Ast_Expression* expr, int indent) {

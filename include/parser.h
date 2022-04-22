@@ -11,7 +11,7 @@ public:
     Parser(std::vector<Token>* tokens);
     ~Parser();
 
-    void run();
+    void parse();
 
     Token* peek();
     Token* advance();

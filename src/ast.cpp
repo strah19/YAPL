@@ -21,11 +21,11 @@
 static MemoryManager memory_manager;
 
 void* Ast::operator new (size_t size) {
-    memory_manager.alloc(size);
+    return memory_manager.allocate(size);
 }
 
 void* Ast::operator new[] (size_t size) {
-    memory_manager.alloc(size);
+    return memory_manager.allocate(size);
 }
 
 void Ast::operator delete (void* chunk) {

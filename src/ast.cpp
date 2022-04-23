@@ -16,22 +16,3 @@
  */
 
 #include "ast.h"
-#include "mem.h"
-
-static MemoryManager memory_manager;
-
-void* Ast::operator new (size_t size) {
-    return memory_manager.allocate(size);
-}
-
-void* Ast::operator new[] (size_t size) {
-    return memory_manager.allocate(size);
-}
-
-void Ast::operator delete (void* chunk) {
-    memory_manager.free(chunk);
-}
-
-void Ast::operator delete[] (void* chunk) {
-    memory_manager.free(chunk);
-}

@@ -14,10 +14,8 @@
  * 
  * Defines the languages syntax and parsers the tokens from the lexer.
  */
-
 #include "parser.h"
 #include "err.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -36,13 +34,11 @@ void Parser::parse() {
 
         if (dec)
             root->declerations.push_back(dec);
-
-        match(Tok::T_SEMI);
     }
 }
 
-Token* Parser::peek() {
-    return &tokens[current];
+Token* Parser::peek(int index) {
+    return &tokens[current + index];
 }
 
 Token* Parser::advance() {
@@ -80,7 +76,29 @@ bool Parser::is_end() {
 }
 
 Ast_Decleration* Parser::decleration() {
+    auto dec = new Ast_Decleration;
+
+    try {
+        throw ParserError();
+        if (peek()->type == Tok::T_IDENTIFIER && peek(1)->type == Tok::T_COLON) {
+            //variable decleration
+        }
+    }
+    catch(ParserError error) {
+        synchronize();
+        return nullptr;
+    }
+
+    return statement();
+}
+
+Ast_Statement* Parser::statement() {
+
     return nullptr;
+}
+
+void Parser::synchronize() {
+    printf("hahahah\n");
 }
 
 Ast_Expression* Parser::expression() {

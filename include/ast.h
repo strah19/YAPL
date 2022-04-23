@@ -42,12 +42,6 @@ enum {
 
 struct Ast {
 	int type = 0;
-
-    void* operator new(size_t size);
-    void* operator new[](size_t size);
-
-    void operator delete(void* chunk);
-    void operator delete[](void* chunk);
 };
 
 struct Ast_Identifier : public Ast {

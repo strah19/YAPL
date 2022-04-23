@@ -5,6 +5,10 @@
 #include "lexer.h"
 #include "ast.h"
 
+struct ParserError {
+    
+};
+
 class Parser {
 public:
     Parser() = default;
@@ -13,7 +17,7 @@ public:
 
     void parse();
 
-    Token* peek();
+    Token* peek(int index = 0);
     Token* advance();
 
     void match(int type);
@@ -35,7 +39,9 @@ private:
     Ast_Identifier* identifier();
 
     Ast_Decleration* decleration();
+    Ast_Statement* statement();
 
+    void synchronize();
     int token_to_ast(Token* token);
     void ident(int indent);
 private:

@@ -33,8 +33,6 @@ namespace Tok {
 
         T_EOF = 255,
 
-
-        T_COLON_ASSIGN,
         T_AND,
         T_OR,
         T_IF,

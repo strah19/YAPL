@@ -55,6 +55,7 @@ namespace Tok {
         T_DOUBLE,
         T_BYTE,
         T_BOOLEAN,
+        T_VAR,
 
         T_IDENTIFIER,
         T_INT_CONST,

@@ -62,6 +62,7 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("return", Tok::T_RETURN);
     keywords.insert("from", Tok::T_FROM);
     keywords.insert("constant", Tok::T_CONST);
+    keywords.insert("var", Tok::T_VAR);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);
@@ -297,10 +298,7 @@ uint8_t* Lexer::load(const char* filepath, uint32_t* size) {
             stream = (uint8_t *) malloc(st.st_size + 1);
             *size = st.st_size;
             fread((void*) stream, 1, st.st_size, file);
-            stream[*size] = '\0';
-            
-            if ((char)stream[*size - 2] != '\n')
-                fatal_error("file '%s' needs to end with a new line ('\\n').\n", filepath);
+            stream[*size - 1] = '\0';
         }
         else 
             fatal_error("failed to load stats of input file.\n");

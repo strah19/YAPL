@@ -6,7 +6,10 @@
 #include "ast.h"
 
 struct ParserError {
-    
+    Token* token = nullptr;
+
+    ParserError() = default;
+    ParserError(Token* token) : token(token) { }
 };
 
 class Parser {
@@ -20,7 +23,9 @@ public:
     Token* peek(int index = 0);
     Token* advance();
 
-    void match(int type);
+    ParserError parser_error(Token* token, const char* msg);
+    Token* consume(int type, const char* msg);
+    bool match(int type);
     bool check(int type);
     bool is_end();
 
@@ -36,8 +41,7 @@ private:
     Ast_Expression* unary();
     Ast_Expression* primary();
 
-    Ast_Identifier* identifier();
-
+    Ast_Assignment* var_decleration();
     Ast_Decleration* decleration();
     Ast_Statement* statement();
 

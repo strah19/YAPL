@@ -46,6 +46,7 @@ struct Ast {
 
 struct Ast_Identifier : public Ast {
 	Ast_Identifier() { type = AST_ID; }
+    Ast_Identifier(const char* id) : id(id) { type = AST_ID; }
     const char* id;
 };
 
@@ -91,12 +92,14 @@ struct Ast_Decleration : public Ast {
 
 struct Ast_Statement : public Ast_Decleration {
     Ast_Statement() { type = AST_STATEMENT; }
+    Ast_Statement(Ast_Expression* expression) : expression(expression) { type = AST_STATEMENT; }
 
     Ast_Expression* expression = nullptr;
 };
 
 struct Ast_Assignment : public Ast_Decleration {
     Ast_Assignment() { type = AST_ASSIGNMENT; }
+    Ast_Assignment(Ast_Identifier* ident, Ast_Expression* expression) : ident(ident), expression(expression) { type = AST_ASSIGNMENT; }
 
     Ast_Identifier* ident = nullptr;
     Ast_Expression* expression = nullptr;

@@ -14,10 +14,15 @@
  * 
  * Defines the languages syntax and parsers the tokens from the lexer.
  */
+
 #include "parser.h"
 #include "err.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+//error messages
+#define EXPECTED_ID "expected an identifier"
+#define EXPECTED_SEMI "expected semicolon after statement"
 
 Parser::Parser(std::vector<Token>* tokens) : tokens(*tokens) { 
     root =  new Ast_TranslationUnit;
@@ -45,30 +50,27 @@ Token* Parser::advance() {
     return ((!is_end()) ? &tokens[current++] : &tokens[current]);
 }
 
-void Parser::match(int type) {
-    if (peek()->type == type) {
-        advance();
-    }
-    else {
-        begin_custom_error();
-
-        printf("expected ");
-        Lexer::print_from_type(type);
-        printf(" but found '");
-        Lexer::print_token(*peek());
-        printf("'.\n");
-
-        end_custom_error();
-        exit(EXIT_FAILURE);
-    }
-}
-
-bool Parser::check(int type) {
-    if (peek()->type == type) {
+bool Parser::match(int type) {
+    if (check(type)) {
         advance();
         return true;
     }
     return false;
+}
+
+bool Parser::check(int type) {
+    return (peek()->type == type);
+}
+
+Token* Parser::consume(int type, const char* msg) {
+    if (check(type)) return advance();
+
+    throw parser_error(peek(), msg);
+}
+
+ParserError Parser::parser_error(Token* token, const char* msg) {
+    report_error("on line %d: '%s'.\n", token->line, msg);
+    return ParserError(token);
 }
 
 bool Parser::is_end() {
@@ -76,29 +78,50 @@ bool Parser::is_end() {
 }
 
 Ast_Decleration* Parser::decleration() {
-    auto dec = new Ast_Decleration;
-
     try {
-        throw ParserError();
-        if (peek()->type == Tok::T_IDENTIFIER && peek(1)->type == Tok::T_COLON) {
-            //variable decleration
-        }
+        if (match(Tok::T_VAR)) 
+            return var_decleration();
+        return statement();
     }
-    catch(ParserError error) {
+    catch (ParserError error) {
         synchronize();
         return nullptr;
     }
-
-    return statement();
 }
 
-Ast_Statement* Parser::statement() {
+Ast_Assignment* Parser::var_decleration() {
+    consume(Tok::T_IDENTIFIER, EXPECTED_ID);
+    auto id = new Ast_Identifier(peek(-1)->identifier);
+    consume(Tok::T_COLON, "expected : for variable decleration");
+    consume(Tok::T_INT, "expected int");
 
+    auto expr = new Ast_Expression;
+    if (match(Tok::T_EQUAL)) 
+        expr = expression();
+
+    consume(Tok::T_SEMI, EXPECTED_SEMI);
+
+    auto dec = Ast_Assignment(id, expr);
     return nullptr;
 }
 
+Ast_Statement* Parser::statement() {
+    auto expr = expression();
+    consume(Tok::T_SEMI, EXPECTED_SEMI);
+    return new Ast_Statement(expr);
+}
+
 void Parser::synchronize() {
-    printf("hahahah\n");
+    advance();
+
+    while (!is_end()) {
+      if (peek(-1)->type == Tok::T_SEMI) return;
+
+      switch (peek()->type) 
+        return;
+ 
+      advance();
+    }   
 }
 
 Ast_Expression* Parser::expression() {
@@ -108,7 +131,7 @@ Ast_Expression* Parser::expression() {
 Ast_Expression* Parser::equality() {
     auto expr = comparison();
 
-    while (check(Tok::T_COMPARE_EQUAL) || check(Tok::T_NOT_EQUAL)) {
+    while (match(Tok::T_COMPARE_EQUAL) || match(Tok::T_NOT_EQUAL)) {
         auto tok = tokens[current - 1];
         auto right = comparison();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
@@ -120,7 +143,7 @@ Ast_Expression* Parser::equality() {
 Ast_Expression* Parser::comparison() {
     auto expr = term();
 
-    while (check(Tok::T_LTE) || check(Tok::T_GTE) || check(Tok::T_LARROW) || check(Tok::T_RARROW)) {
+    while (match(Tok::T_LTE) || match(Tok::T_GTE) || match(Tok::T_LARROW) || match(Tok::T_RARROW)) {
         auto tok = tokens[current - 1];
         auto right = term();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
@@ -132,7 +155,7 @@ Ast_Expression* Parser::comparison() {
 Ast_Expression* Parser::term() {
     auto expr = factor();
 
-    while (check(Tok::T_PLUS) || check(Tok::T_MINUS)) {
+    while (match(Tok::T_PLUS) || match(Tok::T_MINUS)) {
         auto tok = tokens[current - 1];
         auto right = factor();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
@@ -144,7 +167,7 @@ Ast_Expression* Parser::term() {
 Ast_Expression* Parser::factor() {
     auto expr = unary();
     
-    while (check(Tok::T_SLASH) || check(Tok::T_STAR)) {
+    while (match(Tok::T_SLASH) || match(Tok::T_STAR)) {
         auto tok = tokens[current - 1];
         auto right = unary();
         expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
@@ -154,7 +177,7 @@ Ast_Expression* Parser::factor() {
 }
 
 Ast_Expression* Parser::unary() {
-    if (check(Tok::T_MINUS)) {
+    if (match(Tok::T_MINUS)) {
         Ast_Expression* right = unary();
         return new Ast_UnaryExpression(right, AST_UNARY_MINUS);
     }
@@ -172,7 +195,8 @@ Ast_Expression* Parser::primary() {
         break;
     }
     case Tok::T_IDENTIFIER: {
-        prime->ident = identifier();
+        prime->ident = new Ast_Identifier(peek()->identifier);
+        match(Tok::T_IDENTIFIER);
         break;
     }
     case Tok::T_LPAR: {
@@ -187,24 +211,18 @@ Ast_Expression* Parser::primary() {
     return prime;
 }
 
-Ast_Identifier* Parser::identifier() {
-    auto id = new Ast_Identifier;
-    id->id = advance()->identifier;
-    return id;
-}
-
 int Parser::token_to_ast(Token* token) {
     switch (token->type) {
     case Tok::T_COMPARE_EQUAL: return AST_OPERATOR_COMPARITIVE_EQUAL;
-    case Tok::T_NOT_EQUAL: return AST_OPERATOR_COMPARITIVE_NOT_EQUAL;
-    case Tok::T_LTE: return AST_OPERATOR_LTE;
-    case Tok::T_GTE: return AST_OPERATOR_GTE;
-    case Tok::T_LARROW: return AST_OPERATOR_LT;
-    case Tok::T_RARROW: return AST_OPERATOR_GT;
-    case Tok::T_PLUS: return AST_OPERATOR_ADD;
-    case Tok::T_MINUS: return AST_OPERATOR_SUB;
-    case Tok::T_STAR: return AST_OPERATOR_MULTIPLICATIVE;
-    case Tok::T_SLASH: return AST_OPERATOR_DIVISION;
+    case Tok::T_NOT_EQUAL:     return AST_OPERATOR_COMPARITIVE_NOT_EQUAL;
+    case Tok::T_LTE:           return AST_OPERATOR_LTE;
+    case Tok::T_GTE:           return AST_OPERATOR_GTE;
+    case Tok::T_LARROW:        return AST_OPERATOR_LT;
+    case Tok::T_RARROW:        return AST_OPERATOR_GT;
+    case Tok::T_PLUS:          return AST_OPERATOR_ADD;
+    case Tok::T_MINUS:         return AST_OPERATOR_SUB;
+    case Tok::T_STAR:          return AST_OPERATOR_MULTIPLICATIVE;
+    case Tok::T_SLASH:         return AST_OPERATOR_DIVISION;
     }
     return -1;
 }

@@ -92,8 +92,9 @@ struct Ast_Decleration : public Ast {
 
 struct Ast_Statement : public Ast_Decleration {
     Ast_Statement() { type = AST_STATEMENT; }
-    Ast_Statement(Ast_Expression* expression) : expression(expression) { type = AST_STATEMENT; }
+    Ast_Statement(Ast_Expression* expression, bool print = false) : expression(expression), print(print) { type = AST_STATEMENT; }
 
+    bool print = false;
     Ast_Expression* expression = nullptr;
 };
 

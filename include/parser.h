@@ -31,6 +31,7 @@ public:
 
     void visualize();
     void visualize_expression(Ast_Expression* expr, int indent = 1);
+    Ast_TranslationUnit* translation_unit() { return root; }
 private:
     Ast_Expression* expression();
     Ast_Expression* equality();

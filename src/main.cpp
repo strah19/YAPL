@@ -21,6 +21,7 @@
 #include "bench.h"
 #include "parser.h"
 #include "err.h"
+#include "interpreter.h"
 
 int main(int argc, char* argv[]) {
     if (!argv[1])
@@ -34,7 +35,7 @@ int main(int argc, char* argv[]) {
         lex.log();
     end_debug_benchmark("lexer");
     printf("finished lexing %d lines of code...\n", lex.lines());
-    
+    /*
     printf("started parsing...\n");
     begin_debug_benchmark();
     Parser parser(lex.fetch_tokens());
@@ -42,5 +43,9 @@ int main(int argc, char* argv[]) {
     parser.visualize();
     end_debug_benchmark("parser");
 
+    Interpreter interpreter;
+    interpreter.run(parser.translation_unit());
+    */
+   
     return 0;
 }

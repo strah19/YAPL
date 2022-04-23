@@ -30,6 +30,7 @@ namespace Tok {
         T_LARROW = '<',
         T_RARROW = '>',
         T_COMMA = ',', 
+        T_QUOTE = '"',
 
         T_EOF = 255,
 
@@ -56,11 +57,14 @@ namespace Tok {
         T_BYTE,
         T_BOOLEAN,
         T_VAR,
+        T_STRING,
+        T_STRING_CONST,
 
         T_IDENTIFIER,
         T_INT_CONST,
         T_CHAR_CONST,
         T_FLOAT_CONST,
+        T_PRINT, //temp
 
         T_INC,
         T_DEC,
@@ -81,6 +85,7 @@ struct Token {
         float float_const;
         char char_const;
         char* identifier;
+        char* string;
     };
 };
 

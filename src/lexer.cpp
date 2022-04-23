@@ -32,6 +32,7 @@ enum {
     IDENTIFIER = 1,
     NUMERIC,
     SYMBOL,
+    STRING,
     SINGLE_LINE_COMMENT,
     MULTI_LINE_COMMENT
 };
@@ -63,6 +64,8 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("from", Tok::T_FROM);
     keywords.insert("constant", Tok::T_CONST);
     keywords.insert("var", Tok::T_VAR);
+    keywords.insert("print", Tok::T_PRINT);
+    keywords.insert("string", Tok::T_STRING);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);
@@ -180,6 +183,13 @@ void Lexer::run() {
 
                 reset();
             }
+            else if (*stream == '"' && current_type == STRING) {
+                tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
+                tokens[tokens.size() - 1].string = new char[current.size() - 1];
+                strcpy(tokens[tokens.size() - 1].string, current.c_str() + 1);
+
+                reset();
+            }
             else if (current_type == SYMBOL && get_type(*stream) != SYMBOL) {
                 create_sym_token();
                 reset();
@@ -191,6 +201,8 @@ void Lexer::run() {
 
                     if (current_type == SYMBOL) {
                         backtrack_symbol_pos = stream;
+                        if (*stream == '"') 
+                            current_type = STRING;
                     }
                 }
             }      
@@ -247,6 +259,10 @@ void Lexer::print_token(Token& token) {
     }
     case Tok::T_EOF: {
         printf("EOF");
+        break;
+    }
+    case Tok::T_STRING_CONST: {
+        printf("%s", token.string);
         break;
     }
     default: {

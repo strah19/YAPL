@@ -64,7 +64,6 @@ bool Parser::check(int type) {
 
 Token* Parser::consume(int type, const char* msg) {
     if (check(type)) return advance();
-
     throw parser_error(peek(), msg);
 }
 
@@ -94,7 +93,14 @@ Ast_Assignment* Parser::var_decleration() {
     consume(Tok::T_IDENTIFIER, EXPECTED_ID);
     auto id = peek(-1)->identifier;
     consume(Tok::T_COLON, "expected : for variable decleration");
-    consume(Tok::T_INT, "expected int");
+
+    int var_type = AST_TYPE_NONE;
+    if (match(Tok::T_INT))
+        var_type = AST_NUMBER;
+    else if (match(Tok::T_STRING))
+        var_type = AST_STRING;
+    else
+        throw parser_error(peek(), "unknown variable type");
 
     auto expr = new Ast_Expression;
     if (match(Tok::T_EQUAL))
@@ -102,7 +108,7 @@ Ast_Assignment* Parser::var_decleration() {
 
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
-    return new Ast_Assignment(id, expr);
+    return new Ast_Assignment(id, expr, var_type);
 }
 
 Ast_Statement* Parser::statement() {

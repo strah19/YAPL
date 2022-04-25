@@ -106,8 +106,9 @@ struct Ast_Statement : public Ast_Decleration {
 
 struct Ast_Assignment : public Ast_Decleration {
     Ast_Assignment() { type = AST_ASSIGNMENT; }
-    Ast_Assignment(const char* ident, Ast_Expression* expression) : ident(ident), expression(expression) { type = AST_ASSIGNMENT; }
+    Ast_Assignment(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), var_type(var_type) { type = AST_ASSIGNMENT; }
 
+    int var_type = AST_TYPE_NONE;
     const char* ident = nullptr;
     Ast_Expression* expression = nullptr;
 };

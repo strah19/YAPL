@@ -89,26 +89,29 @@ Ast_Decleration* Parser::decleration() {
     }
 }
 
+//NEEDS UPDATING FOR STRING & BOOLEAN TYPE
 Ast_Assignment* Parser::var_decleration() {
     consume(Tok::T_IDENTIFIER, EXPECTED_ID);
-    auto id = new Ast_Identifier(peek(-1)->identifier);
+    auto id = peek(-1)->identifier;
     consume(Tok::T_COLON, "expected : for variable decleration");
     consume(Tok::T_INT, "expected int");
 
     auto expr = new Ast_Expression;
-    if (match(Tok::T_EQUAL)) 
+    if (match(Tok::T_EQUAL))
         expr = expression();
 
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
-    auto dec = Ast_Assignment(id, expr);
-    return nullptr;
+    return new Ast_Assignment(id, expr);
 }
 
 Ast_Statement* Parser::statement() {
+    bool print = false;
+    if (match(Tok::T_PRINT)) 
+        print = true;
     auto expr = expression();
     consume(Tok::T_SEMI, EXPECTED_SEMI);
-    return new Ast_Statement(expr);
+    return new Ast_Statement(expr, print);
 }
 
 void Parser::synchronize() {
@@ -191,11 +194,13 @@ Ast_Expression* Parser::primary() {
     switch (peek()->type) {
     case Tok::T_INT_CONST: {
         prime->int_const = peek()->int_const;
+        prime->type_value = AST_NUMBER;
         match(Tok::T_INT_CONST);
         break;
     }
     case Tok::T_IDENTIFIER: {
-        prime->ident = new Ast_Identifier(peek()->identifier);
+        prime->ident = peek()->identifier;
+        prime->type_value = AST_ID;
         match(Tok::T_IDENTIFIER);
         break;
     }
@@ -204,6 +209,14 @@ Ast_Expression* Parser::primary() {
         auto expr = expression();
         match(Tok::T_RPAR);
         prime->nested = expr;
+        prime->type_value = AST_NESTED;
+        break;
+    }
+    case Tok::T_STRING_CONST: {
+        prime->string = peek()->string;
+        prime->type_value = AST_STRING;
+        printf("%s\n", prime->string);
+        match(Tok::T_STRING_CONST);
         break;
     }
     }
@@ -225,50 +238,4 @@ int Parser::token_to_ast(Token* token) {
     case Tok::T_SLASH:         return AST_OPERATOR_DIVISION;
     }
     return -1;
-}
-
-void Parser::visualize() {
-
-}
-
-void Parser::visualize_expression(Ast_Expression* expr, int indent) {
-    if (expr) {
-        switch (expr->type) {
-        case AST_UNARY: {
-            auto u = AST_CAST(Ast_UnaryExpression, expr);
-            ident(indent);
-            printf("unary: %d\n", u->op);
-            if (u->next) {
-                visualize_expression(u->next, indent + 1);
-            }
-            break;
-        }
-        case AST_PRIMARY: {
-            auto p = AST_CAST(Ast_PrimaryExpression, expr);
-            ident(indent);
-            if (p->nested) {
-                printf("nested: \n");
-                visualize_expression(p->nested, indent + 1);
-            }
-            else
-                printf("primary: %f\n", p->int_const);
-            break;
-        }
-        case AST_BINARY: {
-            auto b = AST_CAST(Ast_BinaryExpression, expr);
-            ident(indent);
-            printf("binary: %d\n", b->op);
-            visualize_expression(b->left, indent + 1);
-            visualize_expression(b->right, indent + 1);
-            break;
-        }
-        }
-    }
-}
-
-void Parser::ident(int indent) {
-    while (indent > 0) {
-        printf("\t");
-        indent--;
-    }
 }

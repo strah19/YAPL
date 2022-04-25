@@ -1,3 +1,2 @@
-var name : int = 4;
-print (name + 4) / 4;
-var test : string = "string";
+var name : int = "strahinja";
+print name;

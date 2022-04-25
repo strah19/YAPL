@@ -158,7 +158,7 @@ void Lexer::move() {
 /**
  * This is the run function. Will use the data from the filepath.
  */
-void Lexer::run() {
+void Lexer::lex() {
     while (*stream != '\0') {
         singleline_comment();
         multiline_comment_beg();
@@ -172,23 +172,25 @@ void Lexer::run() {
                 else if (!isdigit(*stream)) {
                     tokens.push_back(Token(Tok::T_IDENTIFIER, current_line));
                 
-                    tokens[tokens.size() - 1].identifier = new char[current.size()];
-                    strcpy(tokens[tokens.size() - 1].identifier, current.c_str());
+                    tokens.back().identifier = new char[current.size()];
+                    strcpy(tokens.back().identifier, current.c_str());
                     reset();
                 }
             }
             else if (!isdigit(*stream) && current_type == NUMERIC) {
                 tokens.push_back(Token(Tok::T_INT_CONST, current_line));
-                tokens[tokens.size() - 1].int_const = atoi(current.c_str());
+                tokens.back().int_const = atoi(current.c_str());
 
                 reset();
             }
             else if (*stream == '"' && current_type == STRING) {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
-                tokens[tokens.size() - 1].string = new char[current.size() - 1];
-                strcpy(tokens[tokens.size() - 1].string, current.c_str() + 1);
+                tokens.back().string = new char[current.size() - 1];
+                strcpy(tokens.back().string, current.c_str() + 1);
 
                 reset();
+                move();
+                continue;
             }
             else if (current_type == SYMBOL && get_type(*stream) != SYMBOL) {
                 create_sym_token();

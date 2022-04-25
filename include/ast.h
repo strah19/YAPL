@@ -6,7 +6,6 @@
 #include <vector>
 
 enum {
-    AST_ID,
     AST_EXPRESSION,
     AST_UNARY,
     AST_PRIMARY,
@@ -40,14 +39,16 @@ enum {
     AST_UNARY_NONE
 };
 
-struct Ast {
-	int type = 0;
+enum {
+    AST_NUMBER,
+    AST_STRING,
+    AST_NESTED,
+    AST_ID,
+    AST_TYPE_NONE
 };
 
-struct Ast_Identifier : public Ast {
-	Ast_Identifier() { type = AST_ID; }
-    Ast_Identifier(const char* id) : id(id) { type = AST_ID; }
-    const char* id;
+struct Ast {
+	int type = 0;
 };
 
 struct Ast_Expression : Ast {
@@ -56,10 +57,15 @@ struct Ast_Expression : Ast {
 
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
+    int type_value = AST_TYPE_NONE;
 
-    double int_const = 0.0;
-    Ast_Identifier* ident = nullptr;
-    Ast_Expression* nested = nullptr;
+    union {
+        double int_const;
+        const char* ident;
+        const char* string;
+        
+        Ast_Expression* nested;
+    };
 };
 
 struct Ast_BinaryExpression : public Ast_Expression {
@@ -100,9 +106,9 @@ struct Ast_Statement : public Ast_Decleration {
 
 struct Ast_Assignment : public Ast_Decleration {
     Ast_Assignment() { type = AST_ASSIGNMENT; }
-    Ast_Assignment(Ast_Identifier* ident, Ast_Expression* expression) : ident(ident), expression(expression) { type = AST_ASSIGNMENT; }
+    Ast_Assignment(const char* ident, Ast_Expression* expression) : ident(ident), expression(expression) { type = AST_ASSIGNMENT; }
 
-    Ast_Identifier* ident = nullptr;
+    const char* ident = nullptr;
     Ast_Expression* expression = nullptr;
 };
 

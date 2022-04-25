@@ -92,7 +92,7 @@ struct Token {
 class Lexer {
 public:
     Lexer(const char* filepath);
-    void run();
+    void lex();
     void log();
 
     void log_token(Token& token, uint32_t i);

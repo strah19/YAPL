@@ -29,8 +29,6 @@ public:
     bool check(int type);
     bool is_end();
 
-    void visualize();
-    void visualize_expression(Ast_Expression* expr, int indent = 1);
     Ast_TranslationUnit* translation_unit() { return root; }
 private:
     Ast_Expression* expression();
@@ -44,11 +42,10 @@ private:
 
     Ast_Assignment* var_decleration();
     Ast_Decleration* decleration();
-    Ast_Statement* statement();
+    Ast_Statement* statement(); 
 
     void synchronize();
     int token_to_ast(Token* token);
-    void ident(int indent);
 private:
     std::vector<Token> tokens;
     uint32_t current = 0;

@@ -58,6 +58,7 @@ struct Ast_Expression : Ast {
 
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
+    Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
     int type_value = AST_TYPE_NONE;
 
     union {

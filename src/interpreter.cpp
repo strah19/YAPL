@@ -51,15 +51,20 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
 }
 
 void Interpreter::assignment(Ast_Expression* root) {
-    if (root->type == AST_ASSIGNMENT) {
+    if (AST_CAST(Ast_Assignment, root)->expression->type == AST_ASSIGNMENT)
         assignment(AST_CAST(Ast_Assignment, root)->expression);
-        auto assignment = AST_CAST(Ast_Assignment, root);
-        printf("%s\n", assignment->id);
-        environment.must_be_defined(assignment->id);
-        auto obj = evaluate_expression(assignment->expression);
-        printf("found %f\n", obj.number);
-        environment.define(assignment->id, obj.number);
+    auto assignment = AST_CAST(Ast_Assignment, root);
+    environment.must_be_defined(assignment->id);
+
+    Object obj;
+    if (assignment->expression->type == AST_ASSIGNMENT) {
+        auto id = new Ast_PrimaryExpression(AST_CAST(Ast_Assignment, assignment->expression)->id);
+        obj = evaluate_expression(id);
+        delete id;
     }
+    else    
+        obj = evaluate_expression(assignment->expression);
+    environment.define(assignment->id, obj);
 }
 
 RunTimeError Interpreter::runtime_error(const char* msg) {
@@ -92,7 +97,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 
         switch (primary->type_value) {
         case AST_NESTED: return evaluate_expression(primary->nested);
-        case AST_ID: printf("from %s %f\n", primary->ident, environment.get(primary->ident).number); return environment.get(primary->ident);
+        case AST_ID:     return environment.get(primary->ident);
         case AST_NUMBER: return primary->int_const;
         case AST_STRING: return primary->string;
         }

@@ -196,7 +196,7 @@ void Lexer::lex() {
                 create_sym_token();
                 reset();
             }
-            if (!is_spec_char(*stream)) {
+            if (!is_spec_char(*stream) || current_type == STRING) {
                 current.push_back(*stream);
                 if (current.size() == 1) {
                     current_type = get_type(*stream);

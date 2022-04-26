@@ -105,7 +105,7 @@ Ast_VarDecleration* Parser::var_decleration() {
     auto expr = new Ast_Expression;
     if (match(Tok::T_EQUAL))
         expr = expression();
-
+    current_assignment_type = AST_TYPE_NONE;
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
     return new Ast_VarDecleration(id, expr, var_type);
@@ -141,7 +141,6 @@ Ast_Expression* Parser::assignment() {
         auto val = assignment();
 
       //  if (expr->type == AST_PRIMARY) {
-          printf("left hand side %s\n", AST_CAST(Ast_PrimaryExpression, expr)->ident);
             return new Ast_Assignment(val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
         //}
     
@@ -246,7 +245,7 @@ Ast_Expression* Parser::primary() {
 }
 
 void Parser::check_assignment(int type) {
-    if (current_assignment_type == type) return;
+    if (current_assignment_type == type || current_assignment_type == AST_TYPE_NONE) return;
     throw parser_error(peek(), "Type in assignment must match primary-expression");
 }
 

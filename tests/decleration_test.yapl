@@ -1,11 +1,12 @@
 var a : int = 2;
 var b : int = 3;
+var c : int = 4;
+
+a = b = c = 4;
 
 print a;
 print b;
+print c;
+print "hello world";
+print a + b * 3 / c;
 
-a = b = 4;
-
-print a;
-print b;
-print a + b;

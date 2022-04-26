@@ -18,8 +18,8 @@
 #include <stdio.h>
 #include "config.h"
 #include "lexer.h"
-#include "bench.h"
 #include "parser.h"
+#include "bench.h"
 #include "err.h"
 #include "interpreter.h"
 
@@ -36,11 +36,8 @@ int main(int argc, char* argv[]) {
     end_debug_benchmark("lexer");
     printf("finished lexing %d lines of code...\n", lex.lines());
     
-    printf("started parsing...\n");
-    begin_debug_benchmark();
     Parser parser(lex.fetch_tokens());
     parser.parse();
-    end_debug_benchmark("parser");
 
     Interpreter interpreter;
     interpreter.interpret(parser.translation_unit());

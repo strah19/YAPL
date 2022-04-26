@@ -40,16 +40,20 @@ private:
     Ast_Expression* unary();
     Ast_Expression* primary();
 
-    Ast_Assignment* var_decleration();
+    Ast_Expression* assignment();
+    Ast_VarDecleration* var_decleration();
     Ast_Decleration* decleration();
     Ast_Statement* statement(); 
 
     void synchronize();
     int token_to_ast(Token* token);
+    void check_assignment(int type);
 private:
     std::vector<Token> tokens;
     uint32_t current = 0;
     Ast_TranslationUnit* root = nullptr;
+
+    int current_assignment_type = AST_TYPE_NONE;
 };
 
 #endif // !PARSER_H

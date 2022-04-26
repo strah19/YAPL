@@ -1,2 +1,11 @@
-var name : int = "strahinja";
-print name;
+var a : int = 2;
+var b : int = 3;
+
+print a;
+print b;
+
+a = b = 4;
+
+print a;
+print b;
+print a + b;

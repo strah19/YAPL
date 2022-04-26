@@ -33,17 +33,32 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
                         break;
                     }
                 }
+                else if (statement->expression->type == AST_ASSIGNMENT) {
+                    assignment(statement->expression);
+                }
             }
-            else if (unit->declerations[i]->type == AST_ASSIGNMENT) {
-                auto assignment = AST_CAST(Ast_Assignment, unit->declerations[i]);
-                environment.define(assignment->ident, Object());
-                if (assignment->expression) 
-                    environment.define(assignment->ident, evaluate_expression(assignment->expression));
+            else if (unit->declerations[i]->type == AST_VAR_DECLERATION) {
+                auto decleration = AST_CAST(Ast_VarDecleration, unit->declerations[i]);
+                environment.define(decleration->ident, Object());
+                if (decleration->expression) 
+                    environment.define(decleration->ident, evaluate_expression(decleration->expression));
             }
         }
     }
     catch (RunTimeError error) {
         runtime_error(error.msg);
+    }
+}
+
+void Interpreter::assignment(Ast_Expression* root) {
+    if (root->type == AST_ASSIGNMENT) {
+        assignment(AST_CAST(Ast_Assignment, root)->expression);
+        auto assignment = AST_CAST(Ast_Assignment, root);
+        printf("%s\n", assignment->id);
+        environment.must_be_defined(assignment->id);
+        auto obj = evaluate_expression(assignment->expression);
+        printf("found %f\n", obj.number);
+        environment.define(assignment->id, obj.number);
     }
 }
 
@@ -60,8 +75,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         auto left = evaluate_expression(bin->left);
         auto right = evaluate_expression(bin->right);
         
-        if (bin->op != AST_OPERATOR_ADD)
-            check_operators(left, right);
+        check_operators(left, right);
 
         switch (bin->op) {
         case AST_OPERATOR_ADD:            return left.number + right.number;
@@ -78,7 +92,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 
         switch (primary->type_value) {
         case AST_NESTED: return evaluate_expression(primary->nested);
-        case AST_ID: return environment.get(primary->ident);
+        case AST_ID: printf("from %s %f\n", primary->ident, environment.get(primary->ident).number); return environment.get(primary->ident);
         case AST_NUMBER: return primary->int_const;
         case AST_STRING: return primary->string;
         }
@@ -115,4 +129,9 @@ Object Environment::get(const char* name) {
     if (values.find(name) == values.end()) 
         throw RunTimeError("Undefined variable");
     return values[name];
+}
+
+void Environment::must_be_defined(const char* name) {
+    if (values.find(name) != values.end())  return;
+    throw RunTimeError("Undefined variable");
 }

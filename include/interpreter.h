@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "ast.h"
 
-#include <map>
+#include <unordered_map>
 
 struct RunTimeError {
     RunTimeError() = default;
@@ -35,10 +35,12 @@ public:
     Environment() = default;
     ~Environment() = default;
 
+    void must_be_defined(const char* name);
     void define(const char* name, Object object);
     Object get(const char* name);
 private:
-    std::map<std::string, Object> values; 
+    std::unordered_map<std::string, Object> values; 
+    Environment* next = nullptr;
 };
 
 class Interpreter {
@@ -49,6 +51,7 @@ public:
     void interpret(Ast_TranslationUnit* unit);
     static RunTimeError runtime_error(const char* msg);
     void check_operators(const Object& left, const Object& right);
+    void assignment(Ast_Expression* root);
     void division_zero(const Object& right);
 private:
     Object evaluate_expression(Ast_Expression* expression);

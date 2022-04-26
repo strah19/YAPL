@@ -88,8 +88,7 @@ Ast_Decleration* Parser::decleration() {
     }
 }
 
-//NEEDS UPDATING FOR STRING & BOOLEAN TYPE
-Ast_Assignment* Parser::var_decleration() {
+Ast_VarDecleration* Parser::var_decleration() {
     consume(Tok::T_IDENTIFIER, EXPECTED_ID);
     auto id = peek(-1)->identifier;
     consume(Tok::T_COLON, "expected : for variable decleration");
@@ -102,13 +101,14 @@ Ast_Assignment* Parser::var_decleration() {
     else
         throw parser_error(peek(), "unknown variable type");
 
+    current_assignment_type = var_type;
     auto expr = new Ast_Expression;
     if (match(Tok::T_EQUAL))
         expr = expression();
 
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
-    return new Ast_Assignment(id, expr, var_type);
+    return new Ast_VarDecleration(id, expr, var_type);
 }
 
 Ast_Statement* Parser::statement() {
@@ -125,16 +125,30 @@ void Parser::synchronize() {
 
     while (!is_end()) {
       if (peek(-1)->type == Tok::T_SEMI) return;
-
-      switch (peek()->type) 
-        return;
- 
       advance();
     }   
 }
 
 Ast_Expression* Parser::expression() {
-    return equality();
+    return assignment();
+}
+
+Ast_Expression* Parser::assignment() {
+    auto expr = equality();
+
+    if (match(Tok::T_EQUAL)) {
+        Token* equal = peek(-1);
+        auto val = assignment();
+
+      //  if (expr->type == AST_PRIMARY) {
+          printf("left hand side %s\n", AST_CAST(Ast_PrimaryExpression, expr)->ident);
+            return new Ast_Assignment(val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
+        //}
+    
+        parser_error(equal, "l-value in assignment is not valid");
+    }
+
+    return expr;
 }
 
 Ast_Expression* Parser::equality() {
@@ -201,6 +215,7 @@ Ast_Expression* Parser::primary() {
     case Tok::T_INT_CONST: {
         prime->int_const = peek()->int_const;
         prime->type_value = AST_NUMBER;
+        check_assignment(AST_NUMBER);
         match(Tok::T_INT_CONST);
         break;
     }
@@ -221,13 +236,18 @@ Ast_Expression* Parser::primary() {
     case Tok::T_STRING_CONST: {
         prime->string = peek()->string;
         prime->type_value = AST_STRING;
-        printf("%s\n", prime->string);
+        check_assignment(AST_STRING);
         match(Tok::T_STRING_CONST);
         break;
     }
     }
 
     return prime;
+}
+
+void Parser::check_assignment(int type) {
+    if (current_assignment_type == type) return;
+    throw parser_error(peek(), "Type in assignment must match primary-expression");
 }
 
 int Parser::token_to_ast(Token* token) {

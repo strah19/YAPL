@@ -11,6 +11,7 @@ enum {
     AST_PRIMARY,
     AST_BINARY,
     AST_DECLERATION,
+    AST_VAR_DECLERATION,
     AST_ASSIGNMENT,
     AST_STATEMENT,
     AST_TRANSLATION_UNIT
@@ -92,6 +93,14 @@ struct Ast_UnaryExpression : public Ast_Expression {
     int op = AST_UNARY_NONE;
 };
 
+struct Ast_Assignment : public Ast_Expression {
+    Ast_Assignment() { type = AST_ASSIGNMENT; }
+    Ast_Assignment(Ast_Expression* expression, const char* id) : expression(expression), id(id) { type = AST_ASSIGNMENT; }
+
+    const char* id = nullptr;
+    Ast_Expression* expression = nullptr;
+};
+
 struct Ast_Decleration : public Ast {
     Ast_Decleration() { type = AST_DECLERATION; }
 };
@@ -100,16 +109,17 @@ struct Ast_Statement : public Ast_Decleration {
     Ast_Statement() { type = AST_STATEMENT; }
     Ast_Statement(Ast_Expression* expression, bool print = false) : expression(expression), print(print) { type = AST_STATEMENT; }
 
-    bool print = false;
     Ast_Expression* expression = nullptr;
+    bool print = false;
 };
 
-struct Ast_Assignment : public Ast_Decleration {
-    Ast_Assignment() { type = AST_ASSIGNMENT; }
-    Ast_Assignment(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), var_type(var_type) { type = AST_ASSIGNMENT; }
+struct Ast_VarDecleration : public Ast_Decleration {
+    Ast_VarDecleration() { type = AST_VAR_DECLERATION; }
+    Ast_VarDecleration(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), var_type(var_type) { type = AST_VAR_DECLERATION; }
 
     int var_type = AST_TYPE_NONE;
     const char* ident = nullptr;
+
     Ast_Expression* expression = nullptr;
 };
 

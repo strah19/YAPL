@@ -8,5 +8,4 @@ print a;
 print b;
 print c;
 print "hello world";
-print a + b * 3 / c;
-
+print c * a + b - a;

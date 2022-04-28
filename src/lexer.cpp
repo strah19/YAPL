@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <fstream>
 
 #include "lexer.h"
 #include "err.h"
@@ -43,7 +44,7 @@ enum {
  * @param const char* The path to the source file.
  */
 Lexer::Lexer(const char* filepath) {
-    stream = load(filepath, &size);
+    stream = load(filepath);
 
     backtrack_symbol_pos = 0;
 
@@ -159,7 +160,8 @@ void Lexer::move() {
  * This is the run function. Will use the data from the filepath.
  */
 void Lexer::lex() {
-    while (*stream != '\0') {
+    uint8_t* start = stream;
+    while (stream < start + size) {
         singleline_comment();
         multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
@@ -305,24 +307,21 @@ void Lexer::print_from_type(int type) {
     }
 }
 
-uint8_t* Lexer::load(const char* filepath, uint32_t* size) {
+uint8_t* Lexer::load(const char* filepath) {
     uint8_t* stream;
-    FILE* file;
 
-    if(file = fopen(filepath, "r")) {
-        struct stat st;
+    std::ifstream file(filepath);
+    file.seekg(0, std::ios::end);
 
-        if (fstat(fileno(file), &st) != -1) {
-            stream = (uint8_t *) malloc(st.st_size + 1);
-            *size = st.st_size;
-            fread((void*) stream, 1, st.st_size, file);
-            stream[*size - 1] = '\0';
-        }
-        else 
-            fatal_error("failed to load stats of input file.\n");
-    }
-    else 
-        fatal_error("failed to open '%s' for compilation.\n", filepath);
+    if (file.bad()) 
+        fatal_error("could not open file '%s' for compilation.\n", filepath);
+
+    size = file.tellg();
+    stream = (uint8_t*) malloc(sizeof(uint8_t) * size);
+    memset(stream, ' ', sizeof(uint8_t) * size);
+
+    file.seekg(0);
+    file.read((char*) &stream[0], size); 
 
     return stream;
 }

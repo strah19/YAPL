@@ -103,7 +103,7 @@ public:
 
     inline uint32_t lines() const { return current_line; }
 private:
-    uint8_t* load(const char* filepath, uint32_t* size);
+    uint8_t* load(const char* filepath);
 
     void newline();
     void multiline_comment_beg();

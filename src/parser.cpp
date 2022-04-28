@@ -140,9 +140,8 @@ Ast_Expression* Parser::assignment() {
         Token* equal = peek(-1);
         auto val = assignment();
 
-      //  if (expr->type == AST_PRIMARY) {
+        if (expr->type == AST_PRIMARY && AST_CAST(Ast_PrimaryExpression, expr)->type_value == AST_ID) 
             return new Ast_Assignment(val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
-        //}
     
         parser_error(equal, "l-value in assignment is not valid");
     }

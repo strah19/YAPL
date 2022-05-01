@@ -14,6 +14,9 @@ enum {
     AST_VAR_DECLERATION,
     AST_ASSIGNMENT,
     AST_STATEMENT,
+    AST_PRINT,
+    AST_EXPRESSION_STATEMENT,
+    AST_SCOPE,
     AST_TRANSLATION_UNIT
 };
 
@@ -108,10 +111,24 @@ struct Ast_Decleration : public Ast {
 
 struct Ast_Statement : public Ast_Decleration {
     Ast_Statement() { type = AST_STATEMENT; }
-    Ast_Statement(Ast_Expression* expression, bool print = false) : expression(expression), print(print) { type = AST_STATEMENT; }
+};
+
+struct Ast_ExpressionStatement : public Ast_Statement {
+    Ast_ExpressionStatement(Ast_Expression* expression) : expression(expression) { type = AST_EXPRESSION_STATEMENT; }
 
     Ast_Expression* expression = nullptr;
-    bool print = false;
+};
+
+struct Ast_PrintStatement : public Ast_Statement {
+    Ast_PrintStatement(Ast_Expression* expression) : expression(expression) { type = AST_PRINT; }
+
+    Ast_Expression* expression = nullptr;
+};
+
+struct Ast_Scope : public Ast_Statement {
+    Ast_Scope() { type = AST_SCOPE; }
+
+    std::vector<Ast_Decleration*> declerations;
 };
 
 struct Ast_VarDecleration : public Ast_Decleration {

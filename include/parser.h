@@ -40,10 +40,13 @@ private:
     Ast_Expression* unary();
     Ast_Expression* primary();
 
+    Ast_ExpressionStatement* expression_statement();
+    Ast_PrintStatement* print_statement();
     Ast_Expression* assignment();
     Ast_VarDecleration* var_decleration();
     Ast_Decleration* decleration();
     Ast_Statement* statement(); 
+    Ast_Scope* scope();
 
     void synchronize();
     int token_to_ast(Token* token);

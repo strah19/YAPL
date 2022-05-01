@@ -112,12 +112,32 @@ Ast_VarDecleration* Parser::var_decleration() {
 }
 
 Ast_Statement* Parser::statement() {
-    bool print = false;
-    if (match(Tok::T_PRINT)) 
-        print = true;
+    if (match(Tok::T_PRINT)) return print_statement();
+    else if (match(Tok::T_LCURLY)) return scope();
+
+    return expression_statement();
+}
+
+Ast_Scope* Parser::scope() {
+    Ast_Scope* scope = new Ast_Scope;
+    while (!check(Tok::T_RCURLY) && !is_end()) {
+        scope->declerations.push_back(decleration());
+    }
+
+    consume(Tok::T_RCURLY, "Expected '}' for the end of a block");
+    return scope;
+}
+
+Ast_ExpressionStatement* Parser::expression_statement() {
     auto expr = expression();
     consume(Tok::T_SEMI, EXPECTED_SEMI);
-    return new Ast_Statement(expr, print);
+    return new Ast_ExpressionStatement(expr);
+}
+
+Ast_PrintStatement* Parser::print_statement() {
+    auto print = new Ast_PrintStatement(expression());
+    consume(Tok::T_SEMI, EXPECTED_SEMI);
+    return print;
 }
 
 void Parser::synchronize() {

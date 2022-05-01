@@ -18,31 +18,10 @@
 #include "err.h"
 
 void Interpreter::interpret(Ast_TranslationUnit* unit) {
+    current_environment = &environment;
     try {
         for (int i = 0; i < unit->declerations.size(); i++) {
-            if (unit->declerations[i]->type == AST_STATEMENT) {
-                auto statement = AST_CAST(Ast_Statement, unit->declerations[i]);
-                if (statement->print) {
-                    Object obj = evaluate_expression(statement->expression);
-                    switch (obj.type) {
-                    case NUMBER:
-                        printf("%f\n", obj.number);
-                        break;
-                    case STRING:
-                        printf("%s\n", obj.str);
-                        break;
-                    }
-                }
-                else if (statement->expression->type == AST_ASSIGNMENT) {
-                    assignment(statement->expression);
-                }
-            }
-            else if (unit->declerations[i]->type == AST_VAR_DECLERATION) {
-                auto decleration = AST_CAST(Ast_VarDecleration, unit->declerations[i]);
-                environment.define(decleration->ident, Object());
-                if (decleration->expression) 
-                    environment.define(decleration->ident, evaluate_expression(decleration->expression));
-            }
+            execute(unit->declerations[i]);
         }
     }
     catch (RunTimeError error) {
@@ -50,11 +29,53 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
     }
 }
 
+void Interpreter::execute(Ast_Decleration* decleration) {
+    if (decleration->type == AST_EXPRESSION_STATEMENT) {
+        auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
+        if (expression_statement->expression->type == AST_ASSIGNMENT) 
+            assignment(expression_statement->expression); 
+    }
+    else if (decleration->type == AST_SCOPE) {
+        Environment* previous = current_environment;
+        current_environment->next = new Environment;
+        current_environment = current_environment->next;
+        current_environment->previous = previous;
+        auto scope = AST_CAST(Ast_Scope, decleration);
+        for (int i = 0; i < scope->declerations.size(); i++) {
+            execute(scope->declerations[i]);
+        }
+        delete current_environment;
+        current_environment = previous;
+    }
+    else if (decleration->type == AST_PRINT) 
+        print_statement(AST_CAST(Ast_PrintStatement, decleration));
+    else if (decleration->type == AST_VAR_DECLERATION) 
+        variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
+}
+
+void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
+    current_environment->define(decleration->ident, Object());
+    if (decleration->expression) 
+        current_environment->define(decleration->ident, evaluate_expression(decleration->expression));
+}
+
+void Interpreter::print_statement(Ast_PrintStatement* print) {
+    Object obj = evaluate_expression(print->expression);
+    switch (obj.type) {
+    case NUMBER:
+        printf("%f\n", obj.number);
+        break;
+    case STRING:
+        printf("%s\n", obj.str);
+        break;
+    }   
+}
+
 void Interpreter::assignment(Ast_Expression* root) {
     if (AST_CAST(Ast_Assignment, root)->expression->type == AST_ASSIGNMENT)
         assignment(AST_CAST(Ast_Assignment, root)->expression);
     auto assignment = AST_CAST(Ast_Assignment, root);
-    environment.must_be_defined(assignment->id);
+    current_environment->must_be_defined(assignment->id);
 
     Object obj;
     if (assignment->expression->type == AST_ASSIGNMENT) {
@@ -64,7 +85,7 @@ void Interpreter::assignment(Ast_Expression* root) {
     }
     else    
         obj = evaluate_expression(assignment->expression);
-    environment.define(assignment->id, obj);
+    current_environment->define(assignment->id, obj);
 }
 
 RunTimeError Interpreter::runtime_error(const char* msg) {
@@ -97,7 +118,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 
         switch (primary->type_value) {
         case AST_NESTED: return evaluate_expression(primary->nested);
-        case AST_ID:     return environment.get(primary->ident);
+        case AST_ID:     return current_environment->get(primary->ident);
         case AST_NUMBER: return primary->int_const;
         case AST_STRING: return primary->string;
         }
@@ -131,12 +152,20 @@ void Environment::define(const char* name, Object object) {
 }
 
 Object Environment::get(const char* name) {
+    if (values.find(name) == values.end() && previous != nullptr)
+        return previous->get(name); 
+
     if (values.find(name) == values.end()) 
         throw RunTimeError("Undefined variable");
+
     return values[name];
 }
 
 void Environment::must_be_defined(const char* name) {
     if (values.find(name) != values.end())  return;
-    throw RunTimeError("Undefined variable");
+    throw RunTimeError("Undefined variable in assignment");
+}
+
+bool Environment::check(const char* name) {
+    return (values.find(name) == values.end());
 }

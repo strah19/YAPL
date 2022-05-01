@@ -30,17 +30,19 @@ struct Object {
     int type = NONE;
 };
 
-class Environment {
+struct Environment {
 public:
     Environment() = default;
     ~Environment() = default;
 
     void must_be_defined(const char* name);
     void define(const char* name, Object object);
+    bool check(const char* name);
     Object get(const char* name);
-private:
+
     std::unordered_map<std::string, Object> values; 
     Environment* next = nullptr;
+    Environment* previous = nullptr;
 };
 
 class Interpreter {
@@ -54,8 +56,13 @@ public:
     void assignment(Ast_Expression* root);
     void division_zero(const Object& right);
 private:
+    void execute(Ast_Decleration* decleration);
     Object evaluate_expression(Ast_Expression* expression);
+    void print_statement(Ast_PrintStatement* print);
+    void variable_decleration(Ast_VarDecleration* decleration);
+private:
     Environment environment;
+    Environment* current_environment;
 };
 
 #endif // !INTERPRETER_H

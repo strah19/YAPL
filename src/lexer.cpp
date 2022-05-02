@@ -161,6 +161,8 @@ void Lexer::move() {
  */
 void Lexer::lex() {
     uint8_t* start = stream;
+    bool num_has_dec = false;
+    
     while (stream < start + size) {
         singleline_comment();
         multiline_comment_beg();
@@ -180,10 +182,22 @@ void Lexer::lex() {
                 }
             }
             else if (!isdigit(*stream) && current_type == NUMERIC) {
-                tokens.push_back(Token(Tok::T_INT_CONST, current_line));
-                tokens.back().int_const = atoi(current.c_str());
+                if (*stream == '.' && !num_has_dec) {
+                    num_has_dec = true;
+                }
+                else {
+                    if (!num_has_dec) {
+                        tokens.push_back(Token(Tok::T_INT_CONST, current_line));
+                        tokens.back().int_const = atoi(current.c_str());
+                    }
+                    else if (num_has_dec) {
+                        tokens.push_back(Token(Tok::T_FLOAT_CONST, current_line));
+                        tokens.back().float_const = std::stof(current.c_str());
+                        num_has_dec = false;
+                    }
 
-                reset();
+                    reset();
+                }
             }
             else if (*stream == '"' && current_type == STRING) {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
@@ -269,6 +283,9 @@ void Lexer::print_token(Token& token) {
         printf("%s", token.string);
         break;
     }
+    case Tok::T_FLOAT_CONST: {
+        printf("%f", token.float_const);
+    }
     default: {
         if (token.type < Tok::T_EOF)
             printf("%c", token.type);
@@ -293,6 +310,10 @@ void Lexer::print_from_type(int type) {
     }
     case Tok::T_INT_CONST: {
         printf("int-const");
+        break;
+    }
+    case Tok::T_FLOAT_CONST: {
+        printf("float-const");
         break;
     }
     case Tok::T_EOF: {

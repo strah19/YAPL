@@ -82,7 +82,7 @@ struct Token {
 
     union {
         int int_const;
-        float float_const;
+        double float_const;
         char char_const;
         char* identifier;
         char* string;

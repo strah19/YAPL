@@ -21,3 +21,5 @@ print b;
 print c;
 print "hello world";
 print c * a + b - a;
+
+3.3;

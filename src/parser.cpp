@@ -100,6 +100,8 @@ Ast_VarDecleration* Parser::var_decleration() {
         var_type = AST_FLOAT;
     else if (match(Tok::T_STRING))
         var_type = AST_STRING;
+    else if (match(Tok::T_BOOLEAN))
+        var_type = AST_BOOLEAN;
     else
         throw parser_error(peek(), "unknown variable type");
 
@@ -232,6 +234,20 @@ Ast_Expression* Parser::primary() {
     auto prime = new Ast_PrimaryExpression();
 
     switch (peek()->type) {
+    case Tok::T_TRUE: {
+        prime->boolean = true;
+        prime->type_value = AST_BOOLEAN;
+        check_assignment(AST_BOOLEAN);
+        match(Tok::T_TRUE);
+        break;
+    }
+    case Tok::T_FALSE: {
+        prime->boolean = false;
+        prime->type_value = AST_BOOLEAN;
+        check_assignment(AST_BOOLEAN);
+        match(Tok::T_FALSE);
+        break;
+    }
     case Tok::T_INT_CONST: {
         prime->int_const = peek()->int_const;
         prime->type_value = AST_INT;

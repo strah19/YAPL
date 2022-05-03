@@ -46,6 +46,7 @@ enum {
 enum {
     AST_INT,
     AST_FLOAT,
+    AST_BOOLEAN,
     AST_STRING,
     AST_NESTED,
     AST_ID,
@@ -70,6 +71,7 @@ struct Ast_PrimaryExpression : public Ast_Expression {
         int int_const;
         const char* ident;
         const char* string;
+        bool boolean;
         
         Ast_Expression* nested;
     };

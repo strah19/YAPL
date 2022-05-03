@@ -65,6 +65,9 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
     case NUMBER:
         printf("%f\n", obj.number);
         break;
+    case BOOLEAN:
+        printf("%d\n", obj.boolean);
+        break;
     case STRING:
         printf("%s\n", obj.str);
         break;
@@ -100,28 +103,41 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 
         auto left = evaluate_expression(bin->left);
         auto right = evaluate_expression(bin->right);
-        
-        check_operators(left, right);
 
-        switch (bin->op) {
-        case AST_OPERATOR_ADD:            return left.number + right.number;
-        case AST_OPERATOR_MULTIPLICATIVE: return left.number * right.number;
-        case AST_OPERATOR_SUB:            return left.number - right.number;
-        case AST_OPERATOR_DIVISION: 
-            division_zero(right); 
-            return left.number / right.number;
-        }  
+        check_operators(left, right);
+        if (left.type == NUMBER) {
+            switch (bin->op) {
+            case AST_OPERATOR_ADD:            return left.number + right.number;
+            case AST_OPERATOR_MULTIPLICATIVE: return left.number * right.number; 
+            case AST_OPERATOR_SUB:            return left.number - right.number;
+            case AST_OPERATOR_DIVISION: 
+                division_zero(right); 
+                return left.number / right.number;
+            }  
+        }
+        else if (left.type == BOOLEAN) {
+            switch (bin->op) {
+            case AST_OPERATOR_ADD:            return Object(left.boolean + right.boolean, BOOLEAN);
+            case AST_OPERATOR_MULTIPLICATIVE: return Object(left.boolean * right.boolean, BOOLEAN); 
+            case AST_OPERATOR_SUB:            return Object(left.boolean - right.boolean, BOOLEAN); 
+            case AST_OPERATOR_DIVISION: 
+                division_zero(right); 
+                return Object(left.boolean / right.boolean, BOOLEAN);
+            }  
+        }
+
         break;
     }
     case AST_PRIMARY: {
         auto primary = AST_CAST(Ast_PrimaryExpression, expression);
 
         switch (primary->type_value) {
-        case AST_NESTED: return evaluate_expression(primary->nested);
-        case AST_ID:     return current_environment->get(primary->ident);
-        case AST_FLOAT: return primary->float_const;
-        case AST_INT: return primary->int_const;
-        case AST_STRING: return primary->string;
+        case AST_NESTED:  return evaluate_expression(primary->nested);
+        case AST_ID:      return current_environment->get(primary->ident);
+        case AST_FLOAT:   return primary->float_const;
+        case AST_INT:     return primary->int_const;
+        case AST_STRING:  return primary->string;
+        case AST_BOOLEAN: return Object(primary->boolean, BOOLEAN);
         }
     
         break;
@@ -139,12 +155,14 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 }
 
 void Interpreter::division_zero(const Object& right) {
-    if (right.number != 0) return;
+    if (right.type == NUMBER && right.number != 0) return;
+    if (right.type == BOOLEAN && right.boolean != 0) return;
     throw RunTimeError("cannot divide by 0");
 }
 
 void Interpreter::check_operators(const Object& left, const Object& right) {
-    if (left.type == NUMBER && right.type == NUMBER) return;
+    //can be better, refactor...
+    if ((left.type == NUMBER && right.type == NUMBER) || (left.type == BOOLEAN && right.type == BOOLEAN)) return;
     throw RunTimeError("operands must be numbers");
 }
 

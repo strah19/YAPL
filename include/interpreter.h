@@ -16,16 +16,19 @@ struct RunTimeError {
 enum {
     NUMBER,
     STRING,
+    BOOLEAN,
     NONE,
 };
 
 struct Object {
     Object(double number) : number(number), type(NUMBER) { }
     Object(const char* str) : str(str), type(STRING) { }
+    Object(bool boolean, int type) : boolean(boolean), type(type) { }
     Object() { }
     union {
         double number;
         const char* str;
+        bool boolean;
     };
     int type = NONE;
 };

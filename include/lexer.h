@@ -46,15 +46,14 @@ namespace Tok {
         T_COMPARE_EQUAL,
         T_LTE,
         T_GTE,
-        T_FOREIGN,
         T_FROM,
         T_NOT_EQUAL,
+        T_FALSE,
+        T_TRUE,
+        T_DEF,
         
-        T_CONST,
         T_INT,
         T_FLOAT,
-        T_DOUBLE,
-        T_BYTE,
         T_BOOLEAN,
         T_VAR,
         T_STRING,
@@ -62,7 +61,6 @@ namespace Tok {
 
         T_IDENTIFIER,
         T_INT_CONST,
-        T_CHAR_CONST,
         T_FLOAT_CONST,
         T_PRINT, //temp
 

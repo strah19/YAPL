@@ -26,3 +26,6 @@ print 3.3 + 9;
 
 var PI : float = 3.14159 + 1;
 print PI;
+
+var test : boolean = true;
+print true / false;

@@ -57,16 +57,14 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("break", Tok::T_BREAK);
     keywords.insert("int", Tok::T_INT);
     keywords.insert("boolean", Tok::T_BOOLEAN);
-    keywords.insert("byte", Tok::T_BYTE);
-    keywords.insert("double", Tok::T_DOUBLE);
     keywords.insert("float", Tok::T_FLOAT);
-    keywords.insert("foreign", Tok::T_FOREIGN);
     keywords.insert("return", Tok::T_RETURN);
-    keywords.insert("from", Tok::T_FROM);
-    keywords.insert("constant", Tok::T_CONST);
     keywords.insert("var", Tok::T_VAR);
     keywords.insert("print", Tok::T_PRINT);
     keywords.insert("string", Tok::T_STRING);
+    keywords.insert("def", Tok::T_DEF);
+    keywords.insert("true", Tok::T_TRUE);
+    keywords.insert("false", Tok::T_FALSE);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);

@@ -22,4 +22,7 @@ print c;
 print "hello world";
 print c * a + b - a;
 
-3.3;
+print 3.3 + 9;
+
+var PI : float = 3.14159 + 1;
+print PI;

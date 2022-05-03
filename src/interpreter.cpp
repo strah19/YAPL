@@ -119,7 +119,8 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         switch (primary->type_value) {
         case AST_NESTED: return evaluate_expression(primary->nested);
         case AST_ID:     return current_environment->get(primary->ident);
-        case AST_NUMBER: return primary->int_const;
+        case AST_FLOAT: return primary->float_const;
+        case AST_INT: return primary->int_const;
         case AST_STRING: return primary->string;
         }
     

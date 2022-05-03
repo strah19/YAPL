@@ -95,7 +95,9 @@ Ast_VarDecleration* Parser::var_decleration() {
 
     int var_type = AST_TYPE_NONE;
     if (match(Tok::T_INT))
-        var_type = AST_NUMBER;
+        var_type = AST_INT;
+    else if (match(Tok::T_FLOAT))
+        var_type = AST_FLOAT;
     else if (match(Tok::T_STRING))
         var_type = AST_STRING;
     else
@@ -232,9 +234,16 @@ Ast_Expression* Parser::primary() {
     switch (peek()->type) {
     case Tok::T_INT_CONST: {
         prime->int_const = peek()->int_const;
-        prime->type_value = AST_NUMBER;
-        check_assignment(AST_NUMBER);
+        prime->type_value = AST_INT;
+        check_assignment(AST_INT);
         match(Tok::T_INT_CONST);
+        break;
+    }
+    case Tok::T_FLOAT_CONST: {
+        prime->float_const = peek()->float_const;
+        prime->type_value = AST_FLOAT;
+        check_assignment(AST_FLOAT);
+        match(Tok::T_FLOAT_CONST);
         break;
     }
     case Tok::T_IDENTIFIER: {
@@ -264,8 +273,12 @@ Ast_Expression* Parser::primary() {
 }
 
 void Parser::check_assignment(int type) {
-    if (current_assignment_type == type || current_assignment_type == AST_TYPE_NONE) return;
-    throw parser_error(peek(), "Type in assignment must match primary-expression");
+    if (current_assignment_type == type || current_assignment_type == AST_TYPE_NONE || check_if_types_are_numbers(type)) return;
+    throw parser_error(peek(), "Type in assignment or decleration must match primary-expression");
+}
+
+bool Parser::check_if_types_are_numbers(int type) {
+    return (current_assignment_type == AST_FLOAT && type == AST_INT);
 }
 
 int Parser::token_to_ast(Token* token) {

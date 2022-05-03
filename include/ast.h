@@ -44,7 +44,8 @@ enum {
 };
 
 enum {
-    AST_NUMBER,
+    AST_INT,
+    AST_FLOAT,
     AST_STRING,
     AST_NESTED,
     AST_ID,
@@ -65,7 +66,8 @@ struct Ast_PrimaryExpression : public Ast_Expression {
     int type_value = AST_TYPE_NONE;
 
     union {
-        double int_const;
+        double float_const;
+        int int_const;
         const char* ident;
         const char* string;
         

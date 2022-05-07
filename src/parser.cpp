@@ -103,7 +103,7 @@ Ast_VarDecleration* Parser::var_decleration() {
     else
         throw parser_error(peek(), "unknown variable type");
 
-    auto expr = new Ast_Expression;
+    Ast_Expression* expr = nullptr;
     if (match(Tok::T_EQUAL))
         expr = expression();
     consume(Tok::T_SEMI, EXPECTED_SEMI);

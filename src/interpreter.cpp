@@ -22,6 +22,7 @@ Object Object::operator+(const Object& obj) {
     switch (this->type) {
     case NUMBER: return this->number + obj.number;
     case BOOLEAN: return Object(this->boolean + obj.boolean, BOOLEAN);
+    case STRING: return strcat((char*) this->str, (char*) obj.str);
     default: throw Interpreter::runtime_error("unknown type found.");
     }
 }
@@ -98,7 +99,11 @@ void Interpreter::execute(Ast_Decleration* decleration) {
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
     current_environment->define(decleration->ident, Object());
     if (decleration->expression) {
-        Object obj = evaluate_expression(decleration->expression);
+        Object obj;
+        if (decleration->expression)
+            obj = evaluate_expression(decleration->expression);
+        else
+            obj.type = convert_to_interpreter_type(decleration->type_value);
         if (obj.type != convert_to_interpreter_type(decleration->type_value))
             throw runtime_error("types do not match");
         current_environment->define(decleration->ident, obj);

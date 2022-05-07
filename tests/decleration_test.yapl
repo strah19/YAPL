@@ -1,35 +1,5 @@
-a : float = 2;
-b : float = 3;
-c : float = 4;
+voltage : float = 9;    //Voltage of a battery
+internal_resistance : float; //Resistance of the battery
 
-a = b = c = 4;
-
-{
-in : float = 5;
-print in + a;
-    {
-        d : float = 81;
-        print d;
-        print in;
-    }
-}
-
-l : float = 1;
-print l;
-
-print a;
-print b;
-print c;
-print "hello world";
-print c * a + b - a;
-
-print 3.3;
-
-e : float = 2.0 + 1;
-print e;
-print 1 + e;
-PI : float = 3.14159 + 2.3;
-print PI;
-
- test : boolean = true;
-print true / true;
+print "Voltage";
+print voltage;

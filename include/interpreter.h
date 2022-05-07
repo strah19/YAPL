@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "ast.h"
 
+#include <utility>
 #include <unordered_map>
 
 struct RunTimeError {
@@ -31,6 +32,12 @@ struct Object {
         bool boolean;
     };
     int type = NONE;
+
+    Object operator+(const Object& obj);
+    Object operator-(const Object& obj);
+    Object operator*(const Object& obj);
+    Object operator/(const Object& obj);
+    Object operator-();
 };
 
 struct Environment {
@@ -54,15 +61,17 @@ public:
     ~Interpreter() = default;
 
     void interpret(Ast_TranslationUnit* unit);
+
     static RunTimeError runtime_error(const char* msg);
-    void check_operators(const Object& left, const Object& right);
-    void assignment(Ast_Expression* root);
-    void division_zero(const Object& right);
+    static void check_operators(const Object& left, const Object& right);
+    static void division_zero(const Object& right);
 private:
+    void assignment(Ast_Expression* root);
     void execute(Ast_Decleration* decleration);
     Object evaluate_expression(Ast_Expression* expression);
     void print_statement(Ast_PrintStatement* print);
     void variable_decleration(Ast_VarDecleration* decleration);
+    int convert_to_interpreter_type(int ast_type);
 private:
     Environment environment;
     Environment* current_environment;

@@ -17,12 +17,55 @@
 #include "interpreter.h"
 #include "err.h"
 
+Object Object::operator+(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER: return this->number + obj.number;
+    case BOOLEAN: return Object(this->boolean + obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator-(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER: return this->number - obj.number;
+    case BOOLEAN: return Object(this->boolean - obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator*(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER: return this->number * obj.number;
+    case BOOLEAN: return Object(this->boolean * obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator/(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    Interpreter::division_zero(obj);
+    switch (this->type) {
+    case NUMBER: return this->number / obj.number;
+    case BOOLEAN: return Object(this->boolean / obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator-() {
+    switch (this->type) {
+        case NUMBER: return -this->number;
+        default: throw Interpreter::runtime_error("type cannot be negated.");  
+    }
+}
+
 void Interpreter::interpret(Ast_TranslationUnit* unit) {
     current_environment = &environment;
     try {
-        for (int i = 0; i < unit->declerations.size(); i++) {
+        for (int i = 0; i < unit->declerations.size(); i++)
             execute(unit->declerations[i]);
-        }
     }
     catch (RunTimeError error) {
         runtime_error(error.msg);
@@ -41,9 +84,8 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         current_environment = current_environment->next;
         current_environment->previous = previous;
         auto scope = AST_CAST(Ast_Scope, decleration);
-        for (int i = 0; i < scope->declerations.size(); i++) {
+        for (int i = 0; i < scope->declerations.size(); i++)
             execute(scope->declerations[i]);
-        }
         delete current_environment;
         current_environment = previous;
     }
@@ -55,8 +97,12 @@ void Interpreter::execute(Ast_Decleration* decleration) {
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
     current_environment->define(decleration->ident, Object());
-    if (decleration->expression) 
-        current_environment->define(decleration->ident, evaluate_expression(decleration->expression));
+    if (decleration->expression) {
+        Object obj = evaluate_expression(decleration->expression);
+        if (obj.type != convert_to_interpreter_type(decleration->type_value))
+            throw runtime_error("types do not match");
+        current_environment->define(decleration->ident, obj);
+    }
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {
@@ -104,28 +150,13 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         auto left = evaluate_expression(bin->left);
         auto right = evaluate_expression(bin->right);
 
-        check_operators(left, right);
-        if (left.type == NUMBER) {
-            switch (bin->op) {
-            case AST_OPERATOR_ADD:            return left.number + right.number;
-            case AST_OPERATOR_MULTIPLICATIVE: return left.number * right.number; 
-            case AST_OPERATOR_SUB:            return left.number - right.number;
-            case AST_OPERATOR_DIVISION: 
-                division_zero(right); 
-                return left.number / right.number;
-            }  
-        }
-        else if (left.type == BOOLEAN) {
-            switch (bin->op) {
-            case AST_OPERATOR_ADD:            return Object(left.boolean + right.boolean, BOOLEAN);
-            case AST_OPERATOR_MULTIPLICATIVE: return Object(left.boolean * right.boolean, BOOLEAN); 
-            case AST_OPERATOR_SUB:            return Object(left.boolean - right.boolean, BOOLEAN); 
-            case AST_OPERATOR_DIVISION: 
-                division_zero(right); 
-                return Object(left.boolean / right.boolean, BOOLEAN);
-            }  
-        }
-
+        switch (bin->op) {
+        case AST_OPERATOR_ADD:            return left + right;
+        case AST_OPERATOR_MULTIPLICATIVE: return left * right; 
+        case AST_OPERATOR_SUB:            return left - right;
+        case AST_OPERATOR_DIVISION:       return left / right;
+        }  
+ 
         break;
     }
     case AST_PRIMARY: {
@@ -146,12 +177,12 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         auto unary = AST_CAST(Ast_UnaryExpression, expression);
         Object value = evaluate_expression(unary->next);
         switch (unary->op) {
-        case AST_UNARY_MINUS: return -value.number;
+        case AST_UNARY_MINUS: return -value;
         default: return value;
         }
     }
 
-    return 0.0;
+    return Object();
 }
 
 void Interpreter::division_zero(const Object& right) {
@@ -161,9 +192,18 @@ void Interpreter::division_zero(const Object& right) {
 }
 
 void Interpreter::check_operators(const Object& left, const Object& right) {
-    //can be better, refactor...
-    if ((left.type == NUMBER && right.type == NUMBER) || (left.type == BOOLEAN && right.type == BOOLEAN)) return;
+    if (left.type == right.type) return;
     throw RunTimeError("operands must be numbers");
+}
+
+int Interpreter::convert_to_interpreter_type(int ast_type) {
+    switch (ast_type) {
+    case AST_INT:     return NUMBER;
+    case AST_FLOAT:   return NUMBER;
+    case AST_STRING:  return STRING;
+    case AST_BOOLEAN: return BOOLEAN;
+    }
+    return NONE;
 }
 
 void Environment::define(const char* name, Object object) {

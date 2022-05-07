@@ -137,9 +137,9 @@ struct Ast_Scope : public Ast_Statement {
 
 struct Ast_VarDecleration : public Ast_Decleration {
     Ast_VarDecleration() { type = AST_VAR_DECLERATION; }
-    Ast_VarDecleration(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), var_type(var_type) { type = AST_VAR_DECLERATION; }
+    Ast_VarDecleration(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), type_value(type_value) { type = AST_VAR_DECLERATION; }
 
-    int var_type = AST_TYPE_NONE;
+    int type_value = AST_TYPE_NONE;
     const char* ident = nullptr;
 
     Ast_Expression* expression = nullptr;

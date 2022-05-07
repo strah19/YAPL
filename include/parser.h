@@ -50,14 +50,10 @@ private:
 
     void synchronize();
     int token_to_ast(Token* token);
-    void check_assignment(int type);
-    bool check_if_types_are_numbers(int type);
 private:
     std::vector<Token> tokens;
     uint32_t current = 0;
     Ast_TranslationUnit* root = nullptr;
-
-    int current_assignment_type = AST_TYPE_NONE;
 };
 
 #endif // !PARSER_H

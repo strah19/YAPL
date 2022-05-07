@@ -55,7 +55,6 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("continue", Tok::T_CONTINUE);
     keywords.insert("return", Tok::T_RETURN);
     keywords.insert("break", Tok::T_BREAK);
-    keywords.insert("int", Tok::T_INT);
     keywords.insert("boolean", Tok::T_BOOLEAN);
     keywords.insert("float", Tok::T_FLOAT);
     keywords.insert("return", Tok::T_RETURN);

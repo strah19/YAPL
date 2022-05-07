@@ -52,7 +52,6 @@ namespace Tok {
         T_TRUE,
         T_DEF,
         
-        T_INT,
         T_FLOAT,
         T_BOOLEAN,
         T_VAR,

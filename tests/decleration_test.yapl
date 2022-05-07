@@ -1,20 +1,21 @@
-var a : int = 2;
-var b : int = 3;
-var c : int = 4;
+a : float = 2;
+b : float = 3;
+c : float = 4;
 
 a = b = c = 4;
 
 {
-var in : int = 5;
+in : float = 5;
 print in + a;
-
     {
-        var d : int = 81;
+        d : float = 81;
         print d;
         print in;
     }
-
 }
+
+l : float = 1;
+print l;
 
 print a;
 print b;
@@ -22,10 +23,13 @@ print c;
 print "hello world";
 print c * a + b - a;
 
-print 3.3 + 9;
+print 3.3;
 
-var PI : float = 3.14159 + 1;
+e : float = 2.0 + 1;
+print e;
+print 1 + e;
+PI : float = 3.14159 + 2.3;
 print PI;
 
-var test : boolean = true;
-print true / false;
+ test : boolean = true;
+print true / true;

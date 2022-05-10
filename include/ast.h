@@ -16,6 +16,7 @@ enum {
     AST_ASSIGNMENT,
     AST_STATEMENT,
     AST_PRINT,
+    AST_TYPE,
     AST_EXPRESSION_STATEMENT,
     AST_SCOPE,
     AST_TRANSLATION_UNIT
@@ -51,6 +52,11 @@ enum {
     AST_NESTED,
     AST_ID,
     AST_TYPE_NONE
+};
+
+enum {
+    AST_SPECIFIER_NONE  = 0x00,
+    AST_SPECIFIER_CONST = 0x01
 };
 
 struct Ast {
@@ -140,9 +146,11 @@ struct Ast_Scope : public Ast_Statement {
 
 struct Ast_VarDecleration : public Ast_Decleration {
     Ast_VarDecleration() { type = AST_VAR_DECLERATION; }
-    Ast_VarDecleration(const char* ident, Ast_Expression* expression, int type_value) : ident(ident), expression(expression), type_value(type_value) { type = AST_VAR_DECLERATION; }
+    Ast_VarDecleration(const char* ident, Ast_Expression* expression, int type_value, int specifiers) 
+        : ident(ident), expression(expression), type_value(type_value), specifiers(specifiers) { type = AST_VAR_DECLERATION; }
 
     int type_value = AST_TYPE_NONE;
+    int specifiers = AST_SPECIFIER_NONE;
     const char* ident = nullptr;
 
     Ast_Expression* expression = nullptr;

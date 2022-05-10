@@ -108,6 +108,10 @@ Ast_VarDecleration* Parser::var_decleration() {
     auto id = peek(-1)->identifier;
     consume(Tok::T_COLON, "expected : for variable decleration");
 
+    int specifiers = AST_SPECIFIER_NONE;
+    if (match(Tok::T_CONSTANT)) 
+        specifiers |= AST_SPECIFIER_CONST;
+
     int var_type = AST_TYPE_NONE;
     if (TYPES.find(peek()->type) != TYPES.end()) {
         var_type = TYPES[peek()->type];
@@ -119,11 +123,10 @@ Ast_VarDecleration* Parser::var_decleration() {
     Ast_Expression* expr = nullptr;
     if (match(Tok::T_EQUAL))
         expr = expression();
-    if (!expr)
-        expr = AST_NEW(Ast_PrimaryExpression, 0.0);
+    expr = (!expr) ? nullptr : expr;
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
-    return AST_NEW(Ast_VarDecleration, id, expr, var_type);
+    return AST_NEW(Ast_VarDecleration, id, expr, var_type, specifiers);
 }
 
 Ast_Statement* Parser::statement() {

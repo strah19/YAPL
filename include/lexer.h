@@ -56,6 +56,7 @@ namespace Tok {
         T_BOOLEAN,
         T_STRING,
         T_STRING_CONST,
+        T_CONSTANT,
 
         T_IDENTIFIER,
         T_FLOAT_CONST,

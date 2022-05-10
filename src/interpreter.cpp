@@ -78,8 +78,12 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
 void Interpreter::execute(Ast_Decleration* decleration) {
     if (decleration->type == AST_EXPRESSION_STATEMENT) {
         auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
-        if (expression_statement->expression->type == AST_ASSIGNMENT) 
+        if (expression_statement->expression->type == AST_ASSIGNMENT) {
+            auto assign = AST_CAST(Ast_Assignment, expression_statement->expression);
+            if (!current_environment->get(assign->id).mutability)
+                throw runtime_error("Can not have assignment on constant variable.");
             assignment(expression_statement->expression); 
+        }
     }
     else if (decleration->type == AST_SCOPE) {
         Environment* previous = current_environment;
@@ -108,9 +112,12 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
         else
             obj.type = convert_to_interpreter_type(decleration->type_value);
         if (obj.type != convert_to_interpreter_type(decleration->type_value))
-            throw runtime_error("types do not match");
+            throw runtime_error("types do not match.");
+        obj.mutability = (decleration->specifiers & AST_SPECIFIER_CONST) ? false : true;
         current_environment->define(decleration->ident, obj);
     }
+    else if ((decleration->specifiers & AST_SPECIFIER_CONST))
+        throw runtime_error("constant variable must have an expression.");
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {

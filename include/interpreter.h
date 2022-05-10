@@ -27,12 +27,14 @@ struct Object {
     Object(const char* str) : str(str), type(STRING) { }
     Object(bool boolean, int type) : boolean(boolean), type(type) { }
     Object() { }
+
     union {
         double number;
         const char* str;
         bool boolean;
     };
     int type = NONE;
+    bool mutability = true;
 
     Object operator+(const Object& obj);
     Object operator-(const Object& obj);

@@ -9,9 +9,10 @@
 
 struct RunTimeError {
     RunTimeError() = default;
-    RunTimeError(const char* msg) : msg(msg) { }
+    RunTimeError(uint32_t line, const char* msg) : line(line), msg(msg) { }
 
     const char* msg;
+    uint32_t line;
 };
 
 enum {

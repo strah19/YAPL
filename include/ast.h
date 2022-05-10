@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "common.h"
+#include "lexer.h"
 
 #include <vector>
 
@@ -44,7 +45,6 @@ enum {
 };
 
 enum {
-    AST_INT,
     AST_FLOAT,
     AST_BOOLEAN,
     AST_STRING,
@@ -54,7 +54,10 @@ enum {
 };
 
 struct Ast {
+    Ast() { }
+
 	int type = 0;
+    uint32_t line = 0;
 };
 
 struct Ast_Expression : Ast {
@@ -64,11 +67,11 @@ struct Ast_Expression : Ast {
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
     Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
+    Ast_PrimaryExpression(double float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
     int type_value = AST_TYPE_NONE;
 
     union {
         double float_const;
-        int int_const;
         const char* ident;
         const char* string;
         bool boolean;
@@ -124,9 +127,9 @@ struct Ast_ExpressionStatement : public Ast_Statement {
 };
 
 struct Ast_PrintStatement : public Ast_Statement {
-    Ast_PrintStatement(Ast_Expression* expression) : expression(expression) { type = AST_PRINT; }
+    Ast_PrintStatement(const std::vector<Ast_Expression*>& expressions) : expressions(expressions) { type = AST_PRINT; }
 
-    Ast_Expression* expression = nullptr;
+    std::vector<Ast_Expression*> expressions;
 };
 
 struct Ast_Scope : public Ast_Statement {

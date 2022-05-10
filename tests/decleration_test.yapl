@@ -1,5 +1,13 @@
-voltage : float = 9;    //Voltage of a battery
-internal_resistance : float; //Resistance of the battery
+</
+    This is a program that will calculate the resistance of a battery.  
+/>
 
-print "Voltage";
-print voltage;
+voltage : float = 9;         //Voltage of a battery
+internal_resistance : float = 0; //Resistance of the battery
+load_resistance : float = 9; //Ohms
+
+init : boolean = false;
+
+print "initalized: ", init;
+print "voltage: ", voltage;
+print "internal resistance: ", internal_resistance;

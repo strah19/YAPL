@@ -58,7 +58,6 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("boolean", Tok::T_BOOLEAN);
     keywords.insert("float", Tok::T_FLOAT);
     keywords.insert("return", Tok::T_RETURN);
-    keywords.insert("var", Tok::T_VAR);
     keywords.insert("print", Tok::T_PRINT);
     keywords.insert("string", Tok::T_STRING);
     keywords.insert("def", Tok::T_DEF);
@@ -184,8 +183,8 @@ void Lexer::lex() {
                 }
                 else {
                     if (!num_has_dec) {
-                        tokens.push_back(Token(Tok::T_INT_CONST, current_line));
-                        tokens.back().int_const = atoi(current.c_str());
+                        tokens.push_back(Token(Tok::T_FLOAT_CONST, current_line));
+                        tokens.back().float_const = atoi(current.c_str());
                     }
                     else if (num_has_dec) {
                         tokens.push_back(Token(Tok::T_FLOAT_CONST, current_line));
@@ -268,10 +267,6 @@ void Lexer::print_token(Token& token) {
         printf("%s", token.identifier);
         break;
     }
-    case Tok::T_INT_CONST: {
-        printf("%d", token.int_const);
-        break;
-    }
     case Tok::T_EOF: {
         printf("EOF");
         break;
@@ -303,10 +298,6 @@ void Lexer::print_from_type(int type) {
     switch (type) {
     case Tok::T_IDENTIFIER: {
         printf("identifier");
-        break;
-    }
-    case Tok::T_INT_CONST: {
-        printf("int-const");
         break;
     }
     case Tok::T_FLOAT_CONST: {

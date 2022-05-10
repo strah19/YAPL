@@ -54,12 +54,10 @@ namespace Tok {
         
         T_FLOAT,
         T_BOOLEAN,
-        T_VAR,
         T_STRING,
         T_STRING_CONST,
 
         T_IDENTIFIER,
-        T_INT_CONST,
         T_FLOAT_CONST,
         T_PRINT, //temp
 
@@ -78,7 +76,6 @@ struct Token {
     uint32_t line = 0;
 
     union {
-        int int_const;
         double float_const;
         char char_const;
         char* identifier;

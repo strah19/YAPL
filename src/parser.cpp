@@ -24,6 +24,21 @@
 #define EXPECTED_ID "expected an identifier"
 #define EXPECTED_SEMI "expected semicolon after statement"
 
+static std::map<int, int> TYPES  = {
+    { Tok::T_FLOAT,   AST_FLOAT   },
+    { Tok::T_STRING,  AST_STRING  },
+    { Tok::T_BOOLEAN, AST_BOOLEAN }
+};
+
+#define AST_NEW(type, ...) \
+    static_cast<type*>(default_ast(new type(__VA_ARGS__)))
+
+Ast* Parser::default_ast(Ast* ast) {
+    ast->line = peek()->line;
+
+    return ast;
+}
+
 Parser::Parser(std::vector<Token>* tokens) : tokens(*tokens) { 
     root =  new Ast_TranslationUnit;
     current = 0;
@@ -94,21 +109,21 @@ Ast_VarDecleration* Parser::var_decleration() {
     consume(Tok::T_COLON, "expected : for variable decleration");
 
     int var_type = AST_TYPE_NONE;
-    if (match(Tok::T_FLOAT))
-        var_type = AST_FLOAT;
-    else if (match(Tok::T_STRING))
-        var_type = AST_STRING;
-    else if (match(Tok::T_BOOLEAN))
-        var_type = AST_BOOLEAN;
+    if (TYPES.find(peek()->type) != TYPES.end()) {
+        var_type = TYPES[peek()->type];
+        match(peek()->type);
+    }
     else
         throw parser_error(peek(), "unknown variable type");
 
     Ast_Expression* expr = nullptr;
     if (match(Tok::T_EQUAL))
         expr = expression();
+    if (!expr)
+        expr = AST_NEW(Ast_PrimaryExpression, 0.0);
     consume(Tok::T_SEMI, EXPECTED_SEMI);
 
-    return new Ast_VarDecleration(id, expr, var_type);
+    return AST_NEW(Ast_VarDecleration, id, expr, var_type);
 }
 
 Ast_Statement* Parser::statement() {
@@ -119,7 +134,7 @@ Ast_Statement* Parser::statement() {
 }
 
 Ast_Scope* Parser::scope() {
-    Ast_Scope* scope = new Ast_Scope;
+    Ast_Scope* scope =AST_NEW(Ast_Scope);
     while (!check(Tok::T_RCURLY) && !is_end()) {
         scope->declerations.push_back(decleration());
     }
@@ -131,13 +146,18 @@ Ast_Scope* Parser::scope() {
 Ast_ExpressionStatement* Parser::expression_statement() {
     auto expr = expression();
     consume(Tok::T_SEMI, EXPECTED_SEMI);
-    return new Ast_ExpressionStatement(expr);
+    return AST_NEW(Ast_ExpressionStatement, expr);
 }
 
 Ast_PrintStatement* Parser::print_statement() {
-    auto print = new Ast_PrintStatement(expression());
+    std::vector<Ast_Expression*> expressions;
+    expressions.push_back(expression());
+
+    while (match(Tok::T_COMMA)) 
+        expressions.push_back(expression());
+
     consume(Tok::T_SEMI, EXPECTED_SEMI);
-    return print;
+    return AST_NEW(Ast_PrintStatement, expressions);
 }
 
 void Parser::synchronize() {
@@ -161,7 +181,7 @@ Ast_Expression* Parser::assignment() {
         auto val = assignment();
 
         if (expr->type == AST_PRIMARY && AST_CAST(Ast_PrimaryExpression, expr)->type_value == AST_ID) 
-            return new Ast_Assignment(val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
+            return AST_NEW(Ast_Assignment, val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
     
         parser_error(equal, "l-value in assignment is not valid");
     }
@@ -175,7 +195,7 @@ Ast_Expression* Parser::equality() {
     while (match(Tok::T_COMPARE_EQUAL) || match(Tok::T_NOT_EQUAL)) {
         auto tok = tokens[current - 1];
         auto right = comparison();
-        expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
     }
 
     return expr;
@@ -187,7 +207,7 @@ Ast_Expression* Parser::comparison() {
     while (match(Tok::T_LTE) || match(Tok::T_GTE) || match(Tok::T_LARROW) || match(Tok::T_RARROW)) {
         auto tok = tokens[current - 1];
         auto right = term();
-        expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
     }
 
     return expr;
@@ -199,7 +219,7 @@ Ast_Expression* Parser::term() {
     while (match(Tok::T_PLUS) || match(Tok::T_MINUS)) {
         auto tok = tokens[current - 1];
         auto right = factor();
-        expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
     }
 
     return expr;
@@ -211,7 +231,7 @@ Ast_Expression* Parser::factor() {
     while (match(Tok::T_SLASH) || match(Tok::T_STAR)) {
         auto tok = tokens[current - 1];
         auto right = unary();
-        expr = new Ast_BinaryExpression(expr, token_to_ast(&tok), right);
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
     }
 
     return expr;
@@ -220,15 +240,14 @@ Ast_Expression* Parser::factor() {
 Ast_Expression* Parser::unary() {
     if (match(Tok::T_MINUS)) {
         Ast_Expression* right = unary();
-        return new Ast_UnaryExpression(right, AST_UNARY_MINUS);
+        return AST_NEW(Ast_UnaryExpression, right, AST_UNARY_MINUS);
     }
 
     return primary();
 }
 
 Ast_Expression* Parser::primary() {
-    auto prime = new Ast_PrimaryExpression();
-
+    auto prime = AST_NEW(Ast_PrimaryExpression);
     switch (peek()->type) {
     case Tok::T_TRUE: {
         prime->boolean = true;
@@ -240,12 +259,6 @@ Ast_Expression* Parser::primary() {
         prime->boolean = false;
         prime->type_value = AST_BOOLEAN;
         match(Tok::T_FALSE);
-        break;
-    }
-    case Tok::T_INT_CONST: {
-        prime->int_const = peek()->int_const;
-        prime->type_value = AST_INT;
-        match(Tok::T_INT_CONST);
         break;
     }
     case Tok::T_FLOAT_CONST: {

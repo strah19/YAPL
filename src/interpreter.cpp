@@ -17,6 +17,8 @@
 #include "interpreter.h"
 #include "err.h"
 
+static uint32_t current_line_interpreting = 0;
+
 Object Object::operator+(const Object& obj) {
     Interpreter::check_operators(*this, obj);
     switch (this->type) {
@@ -69,7 +71,7 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
             execute(unit->declerations[i]);
     }
     catch (RunTimeError error) {
-        runtime_error(error.msg);
+        //backlog errors?
     }
 }
 
@@ -94,6 +96,7 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         print_statement(AST_CAST(Ast_PrintStatement, decleration));
     else if (decleration->type == AST_VAR_DECLERATION) 
         variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
+    current_line_interpreting = decleration->line;
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
@@ -111,18 +114,21 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {
-    Object obj = evaluate_expression(print->expression);
-    switch (obj.type) {
-    case NUMBER:
-        printf("%f\n", obj.number);
-        break;
-    case BOOLEAN:
-        printf("%d\n", obj.boolean);
-        break;
-    case STRING:
-        printf("%s\n", obj.str);
-        break;
-    }   
+    for (int i = 0; i < print->expressions.size(); i++) {
+        Object obj = evaluate_expression(print->expressions[i]);
+        switch (obj.type) {
+        case NUMBER:
+            printf("%f", obj.number);
+            break;
+        case BOOLEAN:
+            printf("%d", obj.boolean);
+            break;
+        case STRING:
+            printf("%s", obj.str);
+            break;
+        }
+    }
+    printf("\n");
 }
 
 void Interpreter::assignment(Ast_Expression* root) {
@@ -143,8 +149,8 @@ void Interpreter::assignment(Ast_Expression* root) {
 }
 
 RunTimeError Interpreter::runtime_error(const char* msg) {
-    report_error("runtime error: %s.\n", msg);
-    return RunTimeError(msg);
+    report_error("runtime error on line %d: %s.\n", current_line_interpreting, msg);
+    return RunTimeError(current_line_interpreting, msg);
 }
 
 Object Interpreter::evaluate_expression(Ast_Expression* expression) {
@@ -171,7 +177,6 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         case AST_NESTED:  return evaluate_expression(primary->nested);
         case AST_ID:      return current_environment->get(primary->ident);
         case AST_FLOAT:   return primary->float_const;
-        case AST_INT:     return primary->int_const;
         case AST_STRING:  return primary->string;
         case AST_BOOLEAN: return Object(primary->boolean, BOOLEAN);
         }
@@ -193,17 +198,16 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 void Interpreter::division_zero(const Object& right) {
     if (right.type == NUMBER && right.number != 0) return;
     if (right.type == BOOLEAN && right.boolean != 0) return;
-    throw RunTimeError("cannot divide by 0");
+    throw runtime_error("cannot divide by 0");
 }
 
 void Interpreter::check_operators(const Object& left, const Object& right) {
     if (left.type == right.type) return;
-    throw RunTimeError("operands must be numbers");
+    throw runtime_error("operands must be numbers");
 }
 
 int Interpreter::convert_to_interpreter_type(int ast_type) {
     switch (ast_type) {
-    case AST_INT:     return NUMBER;
     case AST_FLOAT:   return NUMBER;
     case AST_STRING:  return STRING;
     case AST_BOOLEAN: return BOOLEAN;
@@ -220,14 +224,14 @@ Object Environment::get(const char* name) {
         return previous->get(name); 
 
     if (values.find(name) == values.end()) 
-        throw RunTimeError("Undefined variable");
+        throw Interpreter::runtime_error("Undefined variable");
 
     return values[name];
 }
 
 void Environment::must_be_defined(const char* name) {
     if (values.find(name) != values.end())  return;
-    throw RunTimeError("Undefined variable in assignment");
+    throw Interpreter::runtime_error("Undefined variable in assignment");
 }
 
 bool Environment::check(const char* name) {

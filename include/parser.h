@@ -5,6 +5,8 @@
 #include "lexer.h"
 #include "ast.h"
 
+#include <map>
+
 struct ParserError {
     Token* token = nullptr;
 
@@ -47,6 +49,8 @@ private:
     Ast_Decleration* decleration();
     Ast_Statement* statement(); 
     Ast_Scope* scope();
+
+    Ast* default_ast(Ast* ast);
 
     void synchronize();
     int token_to_ast(Token* token);

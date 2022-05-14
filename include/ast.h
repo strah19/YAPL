@@ -18,7 +18,10 @@ enum {
     AST_PRINT,
     AST_EXPRESSION_STATEMENT,
     AST_SCOPE,
+    AST_CONDITIONAL,
     AST_IF,
+    AST_ELIF,
+    AST_ELSE,
     AST_TRANSLATION_UNIT
 };
 
@@ -142,11 +145,28 @@ struct Ast_PrintStatement : public Ast_Statement {
     std::vector<Ast_Expression*> expressions;
 };
 
-struct Ast_IfStatement : public Ast_Statement {
-    Ast_IfStatement(Ast_Expression* condition, Ast_Scope* scope) : condition(condition), scope(scope) { type = AST_IF; }
+struct Ast_ConditionalStatement : public Ast_Statement {
+    Ast_ConditionalStatement() { type = AST_CONDITIONAL; }
+    Ast_ConditionalStatement(Ast_Expression* condition, Ast_Scope* scope) : condition(condition), scope(scope) { type = AST_CONDITIONAL; }
 
     Ast_Expression* condition = nullptr;
     Ast_Scope* scope = nullptr;
+    Ast_ConditionalStatement* next = nullptr;
+};
+
+struct Ast_IfStatement : Ast_ConditionalStatement {
+    Ast_IfStatement() { type = AST_IF; }
+    Ast_IfStatement(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_IF; }
+};
+
+struct Ast_ElifStatement : Ast_ConditionalStatement {
+    Ast_ElifStatement() { type = AST_ELIF; }
+    Ast_ElifStatement(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_ELIF; }
+};
+
+struct Ast_ElseStatement : Ast_ConditionalStatement {
+    Ast_ElseStatement() { type = AST_ELSE; }
+    Ast_ElseStatement(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_ELSE; }
 };
 
 struct Ast_Scope : public Ast_Statement {

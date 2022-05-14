@@ -137,10 +137,14 @@ Ast_VarDecleration* Parser::var_decleration() {
 
 Ast_Statement* Parser::statement() {
     if (match(Tok::T_PRINT)) return print_statement();
-    else if (match(Tok::T_IF)) return if_statement();
+    else if (match(Tok::T_IF)) return conditional_statement();
     else if (match(Tok::T_LCURLY)) return scope();
 
     return expression_statement();
+}
+
+Ast_ConditionalStatement* Parser::conditional_statement() {
+
 }
 
 Ast_IfStatement* Parser::if_statement() {
@@ -148,6 +152,20 @@ Ast_IfStatement* Parser::if_statement() {
     consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
     auto s = scope();
     return AST_NEW(Ast_IfStatement, expr, s);
+}
+
+Ast_ElifStatement* Parser::elif_statement() {
+    auto expr = expression();
+    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    auto s = scope();
+    return AST_NEW(Ast_ElifStatement, expr, s);
+}
+
+Ast_ElseStatement* Parser::else_statement() {
+    auto expr = expression();
+    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    auto s = scope();
+    return AST_NEW(Ast_ElseStatement, expr, s);
 }
 
 Ast_Scope* Parser::scope() {

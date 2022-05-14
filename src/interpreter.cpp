@@ -57,6 +57,62 @@ Object Object::operator/(const Object& obj) {
     }
 }
 
+Object Object::operator==(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number == obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean == obj.boolean, BOOLEAN);
+    case STRING:  return Object(strcmp(this->str, obj.str), BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator!=(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number != obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean != obj.boolean, BOOLEAN);
+    case STRING:  return Object(!strcmp(this->str, obj.str), BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator>(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number > obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean > obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator<(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number < obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean < obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator>=(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number >= obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean >= obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator<=(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number <= obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean <= obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
 Object Object::operator-() {
     switch (this->type) {
         case NUMBER: return -this->number;
@@ -67,6 +123,7 @@ Object Object::operator-() {
 void Interpreter::interpret(Ast_TranslationUnit* unit) {
     current_environment = &environment;
     try {
+        current_line_interpreting = unit->declerations[0]->line;
         for (int i = 0; i < unit->declerations.size(); i++)
             execute(unit->declerations[i]);
     }
@@ -100,6 +157,8 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         print_statement(AST_CAST(Ast_PrintStatement, decleration));
     else if (decleration->type == AST_VAR_DECLERATION) 
         variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
+    else if (decleration->type == AST_IF) 
+        if_statement(AST_CAST(Ast_IfStatement, decleration));
     current_line_interpreting = decleration->line;
 }
 
@@ -118,6 +177,13 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
     }
     else if ((decleration->specifiers & AST_SPECIFIER_CONST))
         throw runtime_error("constant variable must have an expression.");
+}
+
+void Interpreter::if_statement(Ast_IfStatement* if_state) {
+    Object obj = evaluate_expression(if_state->condition);
+    if (obj.type == BOOLEAN && obj.boolean) {
+        execute(if_state->scope);
+    }
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {
@@ -169,10 +235,16 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         auto right = evaluate_expression(bin->right);
 
         switch (bin->op) {
-        case AST_OPERATOR_ADD:            return left + right;
-        case AST_OPERATOR_MULTIPLICATIVE: return left * right; 
-        case AST_OPERATOR_SUB:            return left - right;
-        case AST_OPERATOR_DIVISION:       return left / right;
+        case AST_OPERATOR_ADD:                   return left + right;
+        case AST_OPERATOR_MULTIPLICATIVE:        return left * right; 
+        case AST_OPERATOR_SUB:                   return left - right;
+        case AST_OPERATOR_DIVISION:              return left / right;
+        case AST_OPERATOR_COMPARITIVE_EQUAL:     return left == right;
+        case AST_OPERATOR_COMPARITIVE_NOT_EQUAL: return left != right;
+        case AST_OPERATOR_GT:                    return left > right;
+        case AST_OPERATOR_LT:                    return left < right;
+        case AST_OPERATOR_GTE:                   return left >= right;
+        case AST_OPERATOR_LTE:                   return left <= right;
         }  
  
         break;

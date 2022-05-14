@@ -30,6 +30,10 @@ static std::map<int, int> TYPES  = {
     { Tok::T_BOOLEAN, AST_BOOLEAN }
 };
 
+static std::map<int, int> SPECIFIERS = {
+    { Tok::T_CONSTANT, AST_SPECIFIER_CONST }
+};
+
 #define AST_NEW(type, ...) \
     static_cast<type*>(default_ast(new type(__VA_ARGS__)))
 
@@ -109,8 +113,10 @@ Ast_VarDecleration* Parser::var_decleration() {
     consume(Tok::T_COLON, "expected : for variable decleration");
 
     int specifiers = AST_SPECIFIER_NONE;
-    if (match(Tok::T_CONSTANT)) 
-        specifiers |= AST_SPECIFIER_CONST;
+    if (SPECIFIERS.find(peek()->type) != SPECIFIERS.end()) {
+        specifiers = SPECIFIERS[peek()->type];
+        match(peek()->type);
+    }
 
     int var_type = AST_TYPE_NONE;
     if (TYPES.find(peek()->type) != TYPES.end()) {
@@ -131,19 +137,27 @@ Ast_VarDecleration* Parser::var_decleration() {
 
 Ast_Statement* Parser::statement() {
     if (match(Tok::T_PRINT)) return print_statement();
+    else if (match(Tok::T_IF)) return if_statement();
     else if (match(Tok::T_LCURLY)) return scope();
 
     return expression_statement();
 }
 
+Ast_IfStatement* Parser::if_statement() {
+    auto expr = expression();
+    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    auto s = scope();
+    return AST_NEW(Ast_IfStatement, expr, s);
+}
+
 Ast_Scope* Parser::scope() {
-    Ast_Scope* scope =AST_NEW(Ast_Scope);
+    Ast_Scope* s = AST_NEW(Ast_Scope);
     while (!check(Tok::T_RCURLY) && !is_end()) {
-        scope->declerations.push_back(decleration());
+        s->declerations.push_back(decleration());
     }
 
     consume(Tok::T_RCURLY, "Expected '}' for the end of a block");
-    return scope;
+    return s;
 }
 
 Ast_ExpressionStatement* Parser::expression_statement() {

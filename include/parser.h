@@ -49,6 +49,7 @@ private:
     Ast_Decleration* decleration();
     Ast_Statement* statement(); 
     Ast_Scope* scope();
+    Ast_IfStatement* if_statement();
 
     Ast* default_ast(Ast* ast);
 

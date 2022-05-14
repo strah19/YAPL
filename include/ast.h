@@ -16,9 +16,9 @@ enum {
     AST_ASSIGNMENT,
     AST_STATEMENT,
     AST_PRINT,
-    AST_TYPE,
     AST_EXPRESSION_STATEMENT,
     AST_SCOPE,
+    AST_IF,
     AST_TRANSLATION_UNIT
 };
 
@@ -58,6 +58,10 @@ enum {
     AST_SPECIFIER_NONE  = 0x00,
     AST_SPECIFIER_CONST = 0x01
 };
+
+struct Ast;
+struct Ast_Expression;
+struct Ast_Scope;
 
 struct Ast {
     Ast() { }
@@ -136,6 +140,13 @@ struct Ast_PrintStatement : public Ast_Statement {
     Ast_PrintStatement(const std::vector<Ast_Expression*>& expressions) : expressions(expressions) { type = AST_PRINT; }
 
     std::vector<Ast_Expression*> expressions;
+};
+
+struct Ast_IfStatement : public Ast_Statement {
+    Ast_IfStatement(Ast_Expression* condition, Ast_Scope* scope) : condition(condition), scope(scope) { type = AST_IF; }
+
+    Ast_Expression* condition = nullptr;
+    Ast_Scope* scope = nullptr;
 };
 
 struct Ast_Scope : public Ast_Statement {

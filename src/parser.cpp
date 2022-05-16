@@ -141,6 +141,7 @@ Ast_Statement* Parser::statement() {
     else if (match(Tok::T_ELIF)) throw parser_error(peek(), "Elif without an if");
     else if (match(Tok::T_ELSE)) throw parser_error(peek(), "else without an if");
     else if (match(Tok::T_LCURLY)) return scope();
+    else if (match(Tok::T_REMIT)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_REMIT);
 
     return expression_statement();
 }
@@ -212,7 +213,7 @@ void Parser::synchronize() {
 
     while (!is_end()) {
         if (peek(-1)->type == Tok::T_SEMI) return;
-        
+
         advance();
     }   
 }

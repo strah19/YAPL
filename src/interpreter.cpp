@@ -132,7 +132,7 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
     }
 }
 
-void Interpreter::execute(Ast_Decleration* decleration) {
+bool Interpreter::execute(Ast_Decleration* decleration) {
     if (decleration->type == AST_EXPRESSION_STATEMENT) {
         auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
         if (expression_statement->expression->type == AST_ASSIGNMENT) {
@@ -149,7 +149,8 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         current_environment->previous = previous;
         auto scope = AST_CAST(Ast_Scope, decleration);
         for (int i = 0; i < scope->declerations.size(); i++)
-            execute(scope->declerations[i]);
+            if (!execute(scope->declerations[i]))
+                break;
         delete current_environment;
         current_environment = previous;
     }
@@ -159,7 +160,11 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
     else if (decleration->type == AST_IF) 
         conditional_statement(AST_CAST(Ast_IfStatement, decleration));
+    else if (decleration->type == AST_CONDITIONAL_CONTROLLER) {
+        return conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
+    }
     current_line_interpreting = decleration->line;
+    return true;
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
@@ -177,6 +182,13 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
     }
     else if ((decleration->specifiers & AST_SPECIFIER_CONST))
         throw runtime_error("constant variable must have an expression.");
+}
+
+bool Interpreter::conditional_controller(Ast_ConditionalController* controller) {
+    switch (controller->controller) {
+    case AST_CONTROLLER_REMIT: return false;
+    default: return true;
+    }
 }
 
 void Interpreter::conditional_statement(Ast_IfStatement* conditional) {

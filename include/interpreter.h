@@ -76,13 +76,14 @@ public:
     static void division_zero(const Object& right);
 private:
     void assignment(Ast_Expression* root);
-    void execute(Ast_Decleration* decleration);
+    bool execute(Ast_Decleration* decleration);
     Object evaluate_expression(Ast_Expression* expression);
     void print_statement(Ast_PrintStatement* print);
     void variable_decleration(Ast_VarDecleration* decleration);
     int convert_to_interpreter_type(int ast_type);
     void conditional_statement(Ast_IfStatement* conditional);
     bool not_else_statement(Ast_ConditionalStatement* conditional);
+    bool conditional_controller(Ast_ConditionalController* controller);
 private:
     Environment environment;
     Environment* current_environment;

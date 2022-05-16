@@ -99,7 +99,7 @@ public:
 
     inline uint32_t lines() const { return current_line; }
 private:
-    uint8_t* load(const char* filepath);
+    void load(const char* filepath);
 
     void newline();
     void multiline_comment_beg();
@@ -125,7 +125,6 @@ public:
     uint8_t* stream = nullptr;
     uint32_t size = 0;
     
-    uint8_t* backtrack_symbol_pos = 0;
     uint32_t nested_comment = 0;
 
     uint32_t counter = 0;

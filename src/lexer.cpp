@@ -44,9 +44,7 @@ enum {
  * @param const char* The path to the source file.
  */
 Lexer::Lexer(const char* filepath) {
-    stream = load(filepath);
-
-    backtrack_symbol_pos = 0;
+    load(filepath);
 
     keywords.insert("if", Tok::T_IF);
     keywords.insert("else", Tok::T_ELSE);
@@ -127,13 +125,11 @@ void Lexer::create_sym_token() {
         Entry* ent = symbols.look_up(current.c_str());
         if (ent) {
             tokens.push_back(Token(ent->type, current_line));
-            stream = backtrack_symbol_pos + i + 2;
             return;
         }
     }
 
     tokens.push_back(Token(current[0], current_line));
-    stream = backtrack_symbol_pos + 1;    
 }
 
 void Lexer::reset() {
@@ -216,7 +212,6 @@ void Lexer::lex() {
                     current_type = get_type(*stream);
 
                     if (current_type == SYMBOL) {
-                        backtrack_symbol_pos = stream;
                         if (*stream == '"') 
                             current_type = STRING;
                     }
@@ -318,9 +313,7 @@ void Lexer::print_from_type(int type) {
     }
 }
 
-uint8_t* Lexer::load(const char* filepath) {
-    uint8_t* stream;
-
+void Lexer::load(const char* filepath) {
     std::ifstream file(filepath);
     file.seekg(0, std::ios::end);
 
@@ -333,6 +326,4 @@ uint8_t* Lexer::load(const char* filepath) {
 
     file.seekg(0);
     file.read((char*) &stream[0], size); 
-
-    return stream;
 }

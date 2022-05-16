@@ -21,6 +21,7 @@ enum {
     AST_CONDITIONAL,
     AST_IF,
     AST_ELIF,
+    AST_CONDITIONAL_CONTROLLER,
     AST_ELSE,
     AST_TRANSLATION_UNIT
 };
@@ -60,6 +61,11 @@ enum {
 enum {
     AST_SPECIFIER_NONE  = 0x00,
     AST_SPECIFIER_CONST = 0x01
+};
+
+enum {
+    AST_CONTROLLER_NONE,
+    AST_CONTROLLER_REMIT
 };
 
 struct Ast;
@@ -185,6 +191,12 @@ struct Ast_VarDecleration : public Ast_Decleration {
     const char* ident = nullptr;
 
     Ast_Expression* expression = nullptr;
+};
+
+struct Ast_ConditionalController : Ast_Statement {
+    Ast_ConditionalController(int controller) : controller(controller) { type = AST_CONDITIONAL_CONTROLLER; }
+
+    int controller = AST_CONTROLLER_NONE;
 };
 
 struct Ast_TranslationUnit : public Ast {

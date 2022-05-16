@@ -3,21 +3,20 @@
 />
 
 VOLTAGE : constant float = 9;         //Voltage of a battery
-internal_resistance : float = 0; //Resistance of the battery
+internal_resistance : float = 3; //Resistance of the battery
 load_resistance : float = 1; //Ohms
 
 init : boolean = false;
 
-print "initalized: ", init;
-print "voltage: ", VOLTAGE; 
-print "internal resistance: ", internal_resistance;
+print init;
+print VOLTAGE; 
+print internal_resistance;
 
 if VOLTAGE > load_resistance {
-    print "Working!";
+    print 3;
+    remit;
+    if 1 == 1 {
+        print 5;
+    }
 }
-if 1 == 1 {
-    print "lol";
-}
-else {
-    print "else";
-}
+print 6;

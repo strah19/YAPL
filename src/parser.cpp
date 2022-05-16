@@ -144,8 +144,19 @@ Ast_Statement* Parser::statement() {
 }
 
 Ast_ConditionalStatement* Parser::conditional_statement() {
+    auto if_state = if_statement();
 
-}
+    Ast_ConditionalStatement* current = if_state;
+    while (match(Tok::T_ELIF)) {
+        current->next = elif_statement();
+        current = current->next;
+    }
+
+    if (match(Tok::T_ELSE)) 
+        current->next = else_statement();
+
+    return if_state;
+} 
 
 Ast_IfStatement* Parser::if_statement() {
     auto expr = expression();
@@ -156,16 +167,15 @@ Ast_IfStatement* Parser::if_statement() {
 
 Ast_ElifStatement* Parser::elif_statement() {
     auto expr = expression();
-    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    consume(Tok::T_LCURLY, "Expected '{' after condition in elif statement");
     auto s = scope();
     return AST_NEW(Ast_ElifStatement, expr, s);
 }
 
 Ast_ElseStatement* Parser::else_statement() {
-    auto expr = expression();
-    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    consume(Tok::T_LCURLY, "Expected '{' after condition in else statement");
     auto s = scope();
-    return AST_NEW(Ast_ElseStatement, expr, s);
+    return AST_NEW(Ast_ElseStatement, s);
 }
 
 Ast_Scope* Parser::scope() {

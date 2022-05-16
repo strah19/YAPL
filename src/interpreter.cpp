@@ -180,10 +180,10 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
 }
 
 void Interpreter::if_statement(Ast_IfStatement* if_state) {
-    Object obj = evaluate_expression(if_state->condition);
-    if (obj.type == BOOLEAN && obj.boolean) {
-        execute(if_state->scope);
-    }
+  //  Object obj = evaluate_expression(if_state->condition);
+  //  if (obj.type == BOOLEAN && obj.boolean) {
+  //      execute(if_state->scope);
+  //  }
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {

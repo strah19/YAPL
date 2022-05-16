@@ -166,7 +166,7 @@ struct Ast_ElifStatement : Ast_ConditionalStatement {
 
 struct Ast_ElseStatement : Ast_ConditionalStatement {
     Ast_ElseStatement() { type = AST_ELSE; }
-    Ast_ElseStatement(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_ELSE; }
+    Ast_ElseStatement(Ast_Scope* scope) : Ast_ConditionalStatement(nullptr, scope) { type = AST_ELSE; }
 };
 
 struct Ast_Scope : public Ast_Statement {

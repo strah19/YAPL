@@ -81,7 +81,8 @@ private:
     void print_statement(Ast_PrintStatement* print);
     void variable_decleration(Ast_VarDecleration* decleration);
     int convert_to_interpreter_type(int ast_type);
-    void if_statement(Ast_IfStatement* if_state);
+    void conditional_statement(Ast_IfStatement* conditional);
+    bool not_else_statement(Ast_ConditionalStatement* conditional);
 private:
     Environment environment;
     Environment* current_environment;

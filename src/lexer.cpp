@@ -64,6 +64,7 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("true", Tok::T_TRUE);
     keywords.insert("false", Tok::T_FALSE);
     keywords.insert("constant", Tok::T_CONSTANT);
+    keywords.insert("remit", Tok::T_REMIT);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);

@@ -49,6 +49,7 @@ namespace Tok {
         T_FROM,
         T_NOT_EQUAL,
         T_FALSE,
+        T_REMIT,
         T_TRUE,
         T_DEF,
         

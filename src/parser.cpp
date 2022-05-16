@@ -138,6 +138,8 @@ Ast_VarDecleration* Parser::var_decleration() {
 Ast_Statement* Parser::statement() {
     if (match(Tok::T_PRINT)) return print_statement();
     else if (match(Tok::T_IF)) return conditional_statement();
+    else if (match(Tok::T_ELIF)) throw parser_error(peek(), "Elif without an if");
+    else if (match(Tok::T_ELSE)) throw parser_error(peek(), "else without an if");
     else if (match(Tok::T_LCURLY)) return scope();
 
     return expression_statement();
@@ -209,8 +211,9 @@ void Parser::synchronize() {
     advance();
 
     while (!is_end()) {
-      if (peek(-1)->type == Tok::T_SEMI) return;
-      advance();
+        if (peek(-1)->type == Tok::T_SEMI) return;
+        
+        advance();
     }   
 }
 

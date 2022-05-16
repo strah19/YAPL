@@ -158,7 +158,7 @@ void Interpreter::execute(Ast_Decleration* decleration) {
     else if (decleration->type == AST_VAR_DECLERATION) 
         variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
     else if (decleration->type == AST_IF) 
-        if_statement(AST_CAST(Ast_IfStatement, decleration));
+        conditional_statement(AST_CAST(Ast_IfStatement, decleration));
     current_line_interpreting = decleration->line;
 }
 
@@ -179,11 +179,26 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
         throw runtime_error("constant variable must have an expression.");
 }
 
-void Interpreter::if_statement(Ast_IfStatement* if_state) {
-  //  Object obj = evaluate_expression(if_state->condition);
-  //  if (obj.type == BOOLEAN && obj.boolean) {
-  //      execute(if_state->scope);
-  //  }
+void Interpreter::conditional_statement(Ast_IfStatement* conditional) {
+    Ast_ConditionalStatement* current = conditional;
+    while (current) {
+        if ((current->type == AST_IF || current->type == AST_ELIF) && not_else_statement(current))
+            break;
+        else if (current->type == AST_ELSE) {
+            execute(current->scope);
+            break;
+        }
+        current = current->next;
+    }
+}
+
+bool Interpreter::not_else_statement(Ast_ConditionalStatement* conditional) {
+    Object obj = evaluate_expression(conditional->condition);
+    if (obj.type == BOOLEAN && obj.boolean) {
+        execute(conditional->scope);
+        return true;
+    }
+    return false;
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {

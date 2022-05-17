@@ -133,6 +133,7 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
 }
 
 bool Interpreter::execute(Ast_Decleration* decleration) {
+    current_line_interpreting = decleration->line;
     if (decleration->type == AST_EXPRESSION_STATEMENT) {
         auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
         if (expression_statement->expression->type == AST_ASSIGNMENT) {
@@ -163,7 +164,6 @@ bool Interpreter::execute(Ast_Decleration* decleration) {
     else if (decleration->type == AST_CONDITIONAL_CONTROLLER) {
         return conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
     }
-    current_line_interpreting = decleration->line;
     return true;
 }
 

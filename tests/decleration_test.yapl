@@ -12,12 +12,12 @@ print "init: ", init;
 print "voltage: ", VOLTAGE; 
 print "internal resistance: ", internal_resistance;
 
-if VOLTAGE < load_resistance {
-    print 3;
+if VOLTAGE > load_resistance {
+    print "in if statement";
+    temp : float = 3;
+    print "var in if: ", temp;
     remit;
-    if 1 == 1 {
-        print 5;
-    }
+    print "this will not be called because the rest of this block is remitted";
 }
 elif 2 != 2 {
 

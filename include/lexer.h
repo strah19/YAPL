@@ -121,8 +121,9 @@ public:
     std::string current;
 
     uint32_t current_type = 0;
+    uint32_t current_index = 0;
 
-    uint8_t* stream = nullptr;
+    std::string stream;
     uint32_t size = 0;
     
     uint32_t nested_comment = 0;

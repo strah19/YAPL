@@ -74,7 +74,7 @@ Lexer::Lexer(const char* filepath) {
 }
 
 char Lexer::incr_char(int32_t off) {
-    return *(stream + off);
+    return stream[current_index + off];
 }
 
 bool Lexer::is_identifier(char c) {
@@ -91,21 +91,21 @@ void Lexer::remove_whitespaces(char* s) {
 }
 
 void Lexer::newline() {
-    if (*stream == '\n') {
+    if (stream[current_index] == '\n') {
         current_line++;
         current_type = (current_type == SINGLE_LINE_COMMENT) ? 0 : current_type;
     }
 }
 
 void Lexer::singleline_comment() {
-    if (*stream == '/' && incr_char() == '/') {
+    if (stream[current_index] == '/' && incr_char() == '/') {
         current_type = (current_type == 0) ? SINGLE_LINE_COMMENT : current_type;
         move();
     }   
 }
 
 void Lexer::multiline_comment_beg() {
-    if (*stream == '<' && incr_char() == '/') {
+    if (stream[current_index] == '<' && incr_char() == '/') {
         nested_comment++;
         current_type = MULTI_LINE_COMMENT;
         move();
@@ -113,7 +113,7 @@ void Lexer::multiline_comment_beg() {
 }
 
 void Lexer::multiline_comment_end() {
-    if (*stream == '/' && incr_char() == '>') {
+    if (stream[current_index] == '/' && incr_char() == '>') {
         nested_comment--;
         current_type = (nested_comment == 0) ? 0 : current_type;
         move();
@@ -147,27 +147,26 @@ uint32_t Lexer::get_type(char c) {
 
 void Lexer::move() {
     counter++;
-    stream++;
+    current_index++;
 }
 
 /**
  * This is the run function. Will use the data from the filepath.
  */
 void Lexer::lex() {
-    uint8_t* start = stream;
     bool num_has_dec = false;
     
-    while (stream < start + size) {
+    while (current_index < stream.size()) {
         singleline_comment();
         multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
-            if (current_type == IDENTIFIER && !is_identifier(*stream)) {
+            if (current_type == IDENTIFIER && !is_identifier(stream[current_index])) {
                 Entry* ent = keywords.look_up(current.c_str());
                 if (ent) {
                     tokens.push_back(Token(ent->type, current_line));
                     reset();
                 }
-                else if (!isdigit(*stream)) {
+                else if (!isdigit(stream[current_index])) {
                     tokens.push_back(Token(Tok::T_IDENTIFIER, current_line));
                 
                     tokens.back().identifier = new char[current.size()];
@@ -175,8 +174,8 @@ void Lexer::lex() {
                     reset();
                 }
             }
-            else if (!isdigit(*stream) && current_type == NUMERIC) {
-                if (*stream == '.' && !num_has_dec) {
+            else if (!isdigit(stream[current_index]) && current_type == NUMERIC) {
+                if (stream[current_index] == '.' && !num_has_dec) {
                     num_has_dec = true;
                 }
                 else {
@@ -193,7 +192,7 @@ void Lexer::lex() {
                     reset();
                 }
             }
-            else if (*stream == '"' && current_type == STRING) {
+            else if (stream[current_index] == '"' && current_type == STRING) {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
                 tokens.back().string = new char[current.size() - 1];
                 strcpy(tokens.back().string, current.c_str() + 1);
@@ -202,17 +201,17 @@ void Lexer::lex() {
                 move();
                 continue;
             }
-            else if (current_type == SYMBOL && get_type(*stream) != SYMBOL) {
+            else if (current_type == SYMBOL && get_type(stream[current_index]) != SYMBOL) {
                 create_sym_token();
                 reset();
             }
-            if (!is_spec_char(*stream) || current_type == STRING) {
-                current.push_back(*stream);
+            if (!is_spec_char(stream[current_index]) || current_type == STRING) {
+                current.push_back(stream[current_index]);
                 if (current.size() == 1) {
-                    current_type = get_type(*stream);
+                    current_type = get_type(stream[current_index]);
 
                     if (current_type == SYMBOL) {
-                        if (*stream == '"') 
+                        if (stream[current_index] == '"') 
                             current_type = STRING;
                     }
                 }
@@ -314,16 +313,15 @@ void Lexer::print_from_type(int type) {
 }
 
 void Lexer::load(const char* filepath) {
-    std::ifstream file(filepath);
-    file.seekg(0, std::ios::end);
+    struct stat sb{};
 
-    if (file.bad()) 
-        fatal_error("could not open file '%s' for compilation.\n", filepath);
+    FILE* input_file = fopen(filepath, "r");
+    if (input_file == nullptr) {
+        perror("fopen");
+    }
 
-    size = file.tellg();
-    stream = (uint8_t*) malloc(sizeof(uint8_t) * size);
-    memset(stream, ' ', sizeof(uint8_t) * size);
-
-    file.seekg(0);
-    file.read((char*) &stream[0], size); 
+    stat(filepath, &sb);
+    stream.resize(sb.st_size);
+    fread(const_cast<char*>(stream.data()), sb.st_size, 1, input_file);
+    fclose(input_file);
 }

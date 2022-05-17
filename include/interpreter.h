@@ -49,19 +49,27 @@ struct Object {
     Object operator<=(const Object& obj);
 };
 
+enum {
+    EN_CONDITION,
+    EN_LOOP,
+    EN_FUNC,
+    EN_NONE
+};
+
 struct Environment {
-public:
     Environment() = default;
     ~Environment() = default;
 
-    void must_be_defined(const char* name);
+    bool must_be_defined(const char* name);
     void define(const char* name, Object object);
+    bool update(const char* name, Object object);
     bool check(const char* name);
     Object get(const char* name);
 
     std::unordered_map<std::string, Object> values; 
     Environment* next = nullptr;
     Environment* previous = nullptr;
+    int type = EN_NONE;
 };
 
 class Interpreter {
@@ -76,17 +84,21 @@ public:
     static void division_zero(const Object& right);
 private:
     void assignment(Ast_Expression* root);
-    bool execute(Ast_Decleration* decleration);
+    void execute(Ast_Decleration* decleration);
     Object evaluate_expression(Ast_Expression* expression);
     void print_statement(Ast_PrintStatement* print);
     void variable_decleration(Ast_VarDecleration* decleration);
     int convert_to_interpreter_type(int ast_type);
-    void conditional_statement(Ast_IfStatement* conditional);
+    void if_statement(Ast_IfStatement* conditional);
     bool not_else_statement(Ast_ConditionalStatement* conditional);
-    bool conditional_controller(Ast_ConditionalController* controller);
+    void conditional_controller(Ast_ConditionalController* controller);
+    void while_loop(Ast_WhileLoop* loop);   
+    void execute_conditions(Ast_Scope* scope); 
+    void execute_loops(Ast_Scope* scope); 
 private:
     Environment environment;
     Environment* current_environment;
+    int backtrack_out_env = EN_NONE;
 };
 
 #endif // !INTERPRETER_H

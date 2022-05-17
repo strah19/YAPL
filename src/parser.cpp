@@ -136,12 +136,15 @@ Ast_VarDecleration* Parser::var_decleration() {
 }
 
 Ast_Statement* Parser::statement() {
+    //***********************REFACTOR***********************//
     if (match(Tok::T_PRINT)) return print_statement();
     else if (match(Tok::T_IF)) return conditional_statement();
     else if (match(Tok::T_ELIF)) throw parser_error(peek(), "Elif without an if");
     else if (match(Tok::T_ELSE)) throw parser_error(peek(), "else without an if");
     else if (match(Tok::T_LCURLY)) return scope();
-    else if (match(Tok::T_REMIT)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_REMIT);
+    else if (match(Tok::T_WHILE)) return while_loop();
+    else if (match(Tok::T_REMIT)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_REMIT); 
+    else if (match(Tok::T_BREAK)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_BREAK);
 
     return expression_statement();
 }
@@ -189,6 +192,13 @@ Ast_Scope* Parser::scope() {
 
     consume(Tok::T_RCURLY, "Expected '}' for the end of a block");
     return s;
+}
+
+Ast_WhileLoop* Parser::while_loop() {
+    auto expr = expression();
+    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
+    auto s = scope();
+    return AST_NEW(Ast_WhileLoop, expr, s);
 }
 
 Ast_ExpressionStatement* Parser::expression_statement() {

@@ -49,10 +49,12 @@ private:
     Ast_Decleration*          decleration();
     Ast_Statement*            statement(); 
     Ast_Scope*                scope();
+
     Ast_ConditionalStatement* conditional_statement();
     Ast_IfStatement*          if_statement();
     Ast_ElifStatement*        elif_statement();
     Ast_ElseStatement*        else_statement();
+    Ast_WhileLoop*            while_loop();
 
     Ast* default_ast(Ast* ast);
 

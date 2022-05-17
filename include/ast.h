@@ -23,6 +23,7 @@ enum {
     AST_ELIF,
     AST_CONDITIONAL_CONTROLLER,
     AST_ELSE,
+    AST_WHILE,
     AST_TRANSLATION_UNIT
 };
 
@@ -65,7 +66,8 @@ enum {
 
 enum {
     AST_CONTROLLER_NONE,
-    AST_CONTROLLER_REMIT
+    AST_CONTROLLER_REMIT,
+    AST_CONTROLLER_BREAK,
 };
 
 struct Ast;
@@ -173,6 +175,11 @@ struct Ast_ElifStatement : Ast_ConditionalStatement {
 struct Ast_ElseStatement : Ast_ConditionalStatement {
     Ast_ElseStatement() { type = AST_ELSE; }
     Ast_ElseStatement(Ast_Scope* scope) : Ast_ConditionalStatement(nullptr, scope) { type = AST_ELSE; }
+};
+
+struct Ast_WhileLoop : Ast_ConditionalStatement {
+    Ast_WhileLoop() { type = AST_WHILE; }
+    Ast_WhileLoop(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_WHILE; }
 };
 
 struct Ast_Scope : public Ast_Statement {

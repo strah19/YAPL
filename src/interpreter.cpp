@@ -132,39 +132,63 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
     }
 }
 
-bool Interpreter::execute(Ast_Decleration* decleration) {
+void Interpreter::execute(Ast_Decleration* decleration) {
     current_line_interpreting = decleration->line;
-    if (decleration->type == AST_EXPRESSION_STATEMENT) {
-        auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
-        if (expression_statement->expression->type == AST_ASSIGNMENT) {
-            auto assign = AST_CAST(Ast_Assignment, expression_statement->expression);
-            if (!current_environment->get(assign->id).mutability)
-                throw runtime_error("Can not have assignment on constant variable.");
-            assignment(expression_statement->expression); 
+    if (current_environment->type == EN_NONE || backtrack_out_env == EN_NONE) {
+        if (decleration->type == AST_EXPRESSION_STATEMENT) {
+            auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
+            if (expression_statement->expression->type == AST_ASSIGNMENT) {
+                auto assign = AST_CAST(Ast_Assignment, expression_statement->expression);
+                if (!current_environment->get(assign->id).mutability)
+                    throw runtime_error("Can not have assignment on constant variable.");
+                assignment(expression_statement->expression); 
+            }
+        }
+        else if (decleration->type == AST_SCOPE) {
+            Environment* previous = current_environment;
+            current_environment->next = new Environment;
+            current_environment = current_environment->next;
+            current_environment->previous = previous;
+            auto scope = AST_CAST(Ast_Scope, decleration);
+
+            for (int i = 0; i < scope->declerations.size(); i++)
+                execute(scope->declerations[i]);
+            current_environment = current_environment->previous;
+            delete current_environment->next;
+        }
+        else if (decleration->type == AST_PRINT) 
+            print_statement(AST_CAST(Ast_PrintStatement, decleration));
+        else if (decleration->type == AST_VAR_DECLERATION) 
+            variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
+        else if (decleration->type == AST_IF) {
+            if_statement(AST_CAST(Ast_IfStatement, decleration));
+        }
+        else if (decleration->type == AST_WHILE)
+            while_loop(AST_CAST(Ast_WhileLoop, decleration));
+        else if (decleration->type == AST_CONDITIONAL_CONTROLLER) {
+            conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
         }
     }
-    else if (decleration->type == AST_SCOPE) {
-        Environment* previous = current_environment;
-        current_environment->next = new Environment;
-        current_environment = current_environment->next;
-        current_environment->previous = previous;
-        auto scope = AST_CAST(Ast_Scope, decleration);
-        for (int i = 0; i < scope->declerations.size(); i++)
-            if (!execute(scope->declerations[i]))
-                break;
-        delete current_environment;
-        current_environment = previous;
+}
+
+void Interpreter::while_loop(Ast_WhileLoop* loop) {
+    Object obj = evaluate_expression(loop->condition);
+    while (obj.type == BOOLEAN && obj.boolean) {
+        execute_loops(loop->scope);
+        obj = evaluate_expression(loop->condition);
     }
-    else if (decleration->type == AST_PRINT) 
-        print_statement(AST_CAST(Ast_PrintStatement, decleration));
-    else if (decleration->type == AST_VAR_DECLERATION) 
-        variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
-    else if (decleration->type == AST_IF) 
-        conditional_statement(AST_CAST(Ast_IfStatement, decleration));
-    else if (decleration->type == AST_CONDITIONAL_CONTROLLER) {
-        return conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
-    }
-    return true;
+}
+
+void Interpreter::execute_conditions(Ast_Scope* scope) {
+    backtrack_out_env = EN_CONDITION;
+    execute(scope);
+    backtrack_out_env = EN_NONE;
+}
+
+void Interpreter::execute_loops(Ast_Scope* scope) {
+    backtrack_out_env = EN_LOOP;
+    execute(scope);
+    backtrack_out_env = EN_NONE;
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
@@ -184,20 +208,20 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
         throw runtime_error("constant variable must have an expression.");
 }
 
-bool Interpreter::conditional_controller(Ast_ConditionalController* controller) {
+void Interpreter::conditional_controller(Ast_ConditionalController* controller) {
     switch (controller->controller) {
-    case AST_CONTROLLER_REMIT: return false;
-    default: return true;
+    case AST_CONTROLLER_REMIT: current_environment->type = EN_CONDITION; break;
+    case AST_CONTROLLER_BREAK: current_environment->type = EN_LOOP; break;
     }
 }
 
-void Interpreter::conditional_statement(Ast_IfStatement* conditional) {
+void Interpreter::if_statement(Ast_IfStatement* conditional) {
     Ast_ConditionalStatement* current = conditional;
     while (current) {
         if ((current->type == AST_IF || current->type == AST_ELIF) && not_else_statement(current))
             break;
         else if (current->type == AST_ELSE) {
-            execute(current->scope);
+            execute_conditions(conditional->scope);
             break;
         }
         current = current->next;
@@ -207,7 +231,7 @@ void Interpreter::conditional_statement(Ast_IfStatement* conditional) {
 bool Interpreter::not_else_statement(Ast_ConditionalStatement* conditional) {
     Object obj = evaluate_expression(conditional->condition);
     if (obj.type == BOOLEAN && obj.boolean) {
-        execute(conditional->scope);
+        execute_conditions(conditional->scope);
         return true;
     }
     return false;
@@ -245,7 +269,7 @@ void Interpreter::assignment(Ast_Expression* root) {
     }
     else    
         obj = evaluate_expression(assignment->expression);
-    current_environment->define(assignment->id, obj);
+    current_environment->update(assignment->id, obj);
 }
 
 RunTimeError Interpreter::runtime_error(const char* msg) {
@@ -325,8 +349,22 @@ void Environment::define(const char* name, Object object) {
     values[name] = object;
 }
 
+bool Environment::update(const char* name, Object object) {
+    if (values.find(name) != values.end()) {
+        values[name] = object;
+        return true;
+    }
+    if (values.find(name) == values.end() && previous) {
+        if (previous->update(name, object))
+            return true;
+    }
+
+    if (values.find(name) == values.end())
+        throw Interpreter::runtime_error("Undefined variable in assignment");
+}
+
 Object Environment::get(const char* name) {
-    if (values.find(name) == values.end() && previous != nullptr)
+    if (values.find(name) == values.end() && previous)
         return previous->get(name); 
 
     if (values.find(name) == values.end()) 
@@ -335,9 +373,17 @@ Object Environment::get(const char* name) {
     return values[name];
 }
 
-void Environment::must_be_defined(const char* name) {
-    if (values.find(name) != values.end())  return;
-    throw Interpreter::runtime_error("Undefined variable in assignment");
+bool Environment::must_be_defined(const char* name) {
+    if (values.find(name) != values.end())
+        return true;
+
+    if (values.find(name) == values.end() && previous) {
+        if (previous->must_be_defined(name))
+            return true;
+    }
+    
+    if (values.find(name) == values.end())
+        throw Interpreter::runtime_error("Undefined variable in assignment");
 }
 
 bool Environment::check(const char* name) {

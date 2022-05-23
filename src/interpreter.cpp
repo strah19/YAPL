@@ -361,6 +361,7 @@ bool Environment::update(const char* name, Object object) {
 
     if (values.find(name) == values.end())
         throw Interpreter::runtime_error("Undefined variable in assignment");
+    return true;
 }
 
 Object Environment::get(const char* name) {
@@ -384,6 +385,7 @@ bool Environment::must_be_defined(const char* name) {
     
     if (values.find(name) == values.end())
         throw Interpreter::runtime_error("Undefined variable in assignment");
+    return true;
 }
 
 bool Environment::check(const char* name) {

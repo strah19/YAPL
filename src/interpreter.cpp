@@ -120,6 +120,31 @@ Object Object::operator-() {
     }
 }
 
+Object Object::operator&&(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number && obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean && obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator||(const Object& obj) {
+    Interpreter::check_operators(*this, obj);
+    switch (this->type) {
+    case NUMBER:  return Object(this->number || obj.number, BOOLEAN);
+    case BOOLEAN: return Object(this->boolean || obj.boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("unknown type found.");
+    }
+}
+
+Object Object::operator!() {
+    switch (this->type) {
+    case BOOLEAN: return Object(!this->boolean, BOOLEAN);
+    default: throw Interpreter::runtime_error("type cannot use '!'");  
+    }
+}
+
 void Interpreter::interpret(Ast_TranslationUnit* unit) {
     current_environment = &environment;
     try {
@@ -296,6 +321,8 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         case AST_OPERATOR_LT:                    return left < right;
         case AST_OPERATOR_GTE:                   return left >= right;
         case AST_OPERATOR_LTE:                   return left <= right;
+        case AST_OPERATOR_AND:                   return left && right;
+        case AST_OPERATOR_OR:                    return left || right;
         }  
  
         break;
@@ -318,6 +345,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
         Object value = evaluate_expression(unary->next);
         switch (unary->op) {
         case AST_UNARY_MINUS: return -value;
+        case AST_UNARY_NOT: return !value;
         default: return value;
         }
     }

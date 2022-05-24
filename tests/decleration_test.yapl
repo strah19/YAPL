@@ -31,10 +31,35 @@ else {
     print "else";
 }
 
-i : float = 0;
-while i < 10 {
-    print i;
+n : constant float = 10;
+t1 : float = 0;
+t2 : float = 1;
+next : float = 0;
+i : float = 1;
+
+print "fibonacci series:";
+
+while i <= n {
+    if (i == 1) {
+        print t1;
+    }
+    elif (i == 2) {
+        print t2;
+    }
+
+    next = t1 + t2;
+    t1 = t2;
+    t2 = next;
+
+    print next;
+
     i = i + 1;
 }
 
-print "exiting...";
+if (1 == 1 and 2 != 2)
+    print "ands are working";
+elif (1 == 1 or 2 != 2)
+    print "ors are working";
+
+if (!init)
+    print "exiting...";

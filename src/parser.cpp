@@ -143,10 +143,15 @@ Ast_Statement* Parser::statement() {
     else if (match(Tok::T_ELSE)) throw parser_error(peek(), "else without an if");
     else if (match(Tok::T_LCURLY)) return scope();
     else if (match(Tok::T_WHILE)) return while_loop();
-    else if (match(Tok::T_REMIT)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_REMIT); 
-    else if (match(Tok::T_BREAK)) return AST_NEW(Ast_ConditionalController, AST_CONTROLLER_BREAK);
+    else if (match(Tok::T_REMIT) || match(Tok::T_BREAK)) return controller_statement();
 
     return expression_statement();
+}
+
+Ast_ConditionalController* Parser::controller_statement() {
+    auto tok = tokens[current - 1];
+    consume(Tok::T_SEMI, EXPECTED_SEMI);
+    return AST_NEW(Ast_ConditionalController, token_to_controller(&tok));
 }
 
 Ast_ConditionalStatement* Parser::conditional_statement() {
@@ -165,22 +170,45 @@ Ast_ConditionalStatement* Parser::conditional_statement() {
 } 
 
 Ast_IfStatement* Parser::if_statement() {
-    auto expr = expression();
-    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
-    auto s = scope();
+    Ast_Scope* s;
+    Ast_Expression* expr;
+    
+    expr = expression();
+    if (match(Tok::T_LCURLY)) {
+        s = scope();
+    }
+    else {
+        s = AST_NEW(Ast_Scope);
+        s->declerations.push_back(statement());
+    }
+    
     return AST_NEW(Ast_IfStatement, expr, s);
 }
 
 Ast_ElifStatement* Parser::elif_statement() {
-    auto expr = expression();
-    consume(Tok::T_LCURLY, "Expected '{' after condition in elif statement");
-    auto s = scope();
+    Ast_Scope* s;
+    Ast_Expression* expr;
+    
+    expr = expression();
+    if (match(Tok::T_LCURLY)) {
+        s = scope();
+    }
+    else {
+        s = AST_NEW(Ast_Scope);
+        s->declerations.push_back(statement());
+    }
     return AST_NEW(Ast_ElifStatement, expr, s);
 }
 
 Ast_ElseStatement* Parser::else_statement() {
-    consume(Tok::T_LCURLY, "Expected '{' after condition in else statement");
-    auto s = scope();
+    Ast_Scope* s;
+    if (match(Tok::T_LCURLY)) {
+        s = scope();
+    }
+    else {
+        s = AST_NEW(Ast_Scope);
+        s->declerations.push_back(statement());
+    }
     return AST_NEW(Ast_ElseStatement, s);
 }
 
@@ -195,9 +223,17 @@ Ast_Scope* Parser::scope() {
 }
 
 Ast_WhileLoop* Parser::while_loop() {
-    auto expr = expression();
-    consume(Tok::T_LCURLY, "Expected '{' after condition in if statement");
-    auto s = scope();
+    Ast_Scope* s;
+    Ast_Expression* expr;
+    
+    expr = expression();
+    if (match(Tok::T_LCURLY)) {
+        s = scope();
+    }
+    else {
+        s = AST_NEW(Ast_Scope);
+        s->declerations.push_back(statement());
+    }
     return AST_NEW(Ast_WhileLoop, expr, s);
 }
 
@@ -233,7 +269,7 @@ Ast_Expression* Parser::expression() {
 }
 
 Ast_Expression* Parser::assignment() {
-    auto expr = equality();
+    auto expr = logical();
 
     if (match(Tok::T_EQUAL)) {
         Token* equal = peek(-1);
@@ -243,6 +279,18 @@ Ast_Expression* Parser::assignment() {
             return AST_NEW(Ast_Assignment, val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
     
         parser_error(equal, "l-value in assignment is not valid");
+    }
+
+    return expr;
+}
+
+Ast_Expression* Parser::logical() {
+    auto expr = equality();
+
+    while (match(Tok::T_AND) || match(Tok::T_OR)) {
+        auto tok = tokens[current - 1];
+        auto right = equality();
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);      
     }
 
     return expr;
@@ -297,9 +345,10 @@ Ast_Expression* Parser::factor() {
 }
 
 Ast_Expression* Parser::unary() {
-    if (match(Tok::T_MINUS)) {
+    if (match(Tok::T_MINUS) || match(Tok::T_EXCLAMATION)) {
+        auto tok = tokens[current - 1];
         Ast_Expression* right = unary();
-        return AST_NEW(Ast_UnaryExpression, right, AST_UNARY_MINUS);
+        return AST_NEW(Ast_UnaryExpression, right, token_to_ast_unary(&tok));
     }
 
     return primary();
@@ -346,6 +395,8 @@ Ast_Expression* Parser::primary() {
         match(Tok::T_STRING_CONST);
         break;
     }
+    default:
+        parser_error(peek(), "Unknown token inside an expression");
     }
 
     return prime;
@@ -363,6 +414,24 @@ int Parser::token_to_ast(Token* token) {
     case Tok::T_MINUS:         return AST_OPERATOR_SUB;
     case Tok::T_STAR:          return AST_OPERATOR_MULTIPLICATIVE;
     case Tok::T_SLASH:         return AST_OPERATOR_DIVISION;
+    case Tok::T_AND:           return AST_OPERATOR_AND;
+    case Tok::T_OR:            return AST_OPERATOR_OR;
+    }
+    return -1;
+}
+
+int Parser::token_to_ast_unary(Token* token) {
+    switch (token->type) {
+    case Tok::T_EXCLAMATION: return AST_UNARY_NOT;
+    case Tok::T_MINUS:       return AST_UNARY_MINUS;
+    }
+    return -1;
+}
+
+int Parser::token_to_controller(Token* token) {
+    switch (token->type) {
+    case Tok::T_REMIT: return AST_CONTROLLER_REMIT;
+    case Tok::T_BREAK: return AST_CONTROLLER_BREAK;
     }
     return -1;
 }

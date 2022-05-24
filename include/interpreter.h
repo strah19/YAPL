@@ -47,6 +47,9 @@ struct Object {
     Object operator<(const Object& obj);
     Object operator>=(const Object& obj);
     Object operator<=(const Object& obj);
+    Object operator&&(const Object& obj);
+    Object operator||(const Object& obj);
+    Object operator!();
 };
 
 enum {

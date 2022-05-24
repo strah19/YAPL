@@ -47,6 +47,7 @@ enum {
 
 enum {
     AST_UNARY_MINUS,
+    AST_UNARY_NOT,
     AST_UNARY_NONE
 };
 

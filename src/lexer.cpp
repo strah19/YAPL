@@ -63,6 +63,8 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("false", Tok::T_FALSE);
     keywords.insert("constant", Tok::T_CONSTANT);
     keywords.insert("remit", Tok::T_REMIT);
+    keywords.insert("and", Tok::T_AND);
+    keywords.insert("or", Tok::T_OR);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);
@@ -128,8 +130,9 @@ void Lexer::create_sym_token() {
             return;
         }
     }
-
-    tokens.push_back(Token(current[0], current_line));
+    for (int i = 0; i < current.size(); i++) {
+        tokens.push_back(Token(current[i], current_line));
+    }
 }
 
 void Lexer::reset() {

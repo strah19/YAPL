@@ -59,7 +59,13 @@ while i <= n {
 if (1 == 1 and 2 != 2)
     print "ands are working";
 elif (1 == 1 or 2 != 2)
-    print "ors are working";
+    print "o rs are working";
 
 if (!init)
     print "exiting...";
+
+print "work work work workwork";
+print "work";
+print "work";
+print "work";
+print "work";

@@ -199,12 +199,12 @@ void Lexer::lex() {
             }
             else if (stream[current_index] == '"' && current_type == STRING) {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
-                tokens.back().string = new char[current.size() - 1];
-                strcpy(tokens.back().string, current.c_str() + 1);
+                current.erase(0, 1);
+                tokens.back().string = new char[current.length() + 1];
+                strcpy(tokens.back().string, current.c_str());
 
                 reset();
                 move();
-                continue;
             }
             else if (current_type == SYMBOL && get_type(stream[current_index]) != SYMBOL) {
                 create_sym_token();

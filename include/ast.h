@@ -23,6 +23,7 @@ enum {
     AST_ELIF,
     AST_CONDITIONAL_CONTROLLER,
     AST_ELSE,
+    AST_FOR,
     AST_WHILE,
     AST_TRANSLATION_UNIT
 };
@@ -181,6 +182,15 @@ struct Ast_ElseStatement : Ast_ConditionalStatement {
 struct Ast_WhileLoop : Ast_ConditionalStatement {
     Ast_WhileLoop() { type = AST_WHILE; }
     Ast_WhileLoop(Ast_Expression* condition, Ast_Scope* scope) : Ast_ConditionalStatement(condition, scope) { type = AST_WHILE; }
+};
+
+struct Ast_ForLoop : Ast_ConditionalStatement {
+    Ast_ForLoop() { type = AST_FOR; }
+    Ast_ForLoop(Ast_Expression* condition, Ast_Scope* scope, Ast_Expression* change, Ast_Decleration* decleration) :
+        Ast_ConditionalStatement(condition, scope), change(change), decleration(decleration) { type = AST_FOR; }
+
+    Ast_Expression* change = nullptr;
+    Ast_Decleration* decleration = nullptr;
 };
 
 struct Ast_Scope : public Ast_Statement {

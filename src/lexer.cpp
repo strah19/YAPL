@@ -65,6 +65,7 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("remit", Tok::T_REMIT);
     keywords.insert("and", Tok::T_AND);
     keywords.insert("or", Tok::T_OR);
+    keywords.insert("for", Tok::T_FOR);
 
     symbols.insert("<=", Tok::T_LTE);
     symbols.insert(">=", Tok::T_GTE);
@@ -130,6 +131,7 @@ void Lexer::create_sym_token() {
             return;
         }
     }
+
     for (int i = 0; i < current.size(); i++) {
         tokens.push_back(Token(current[i], current_line));
     }

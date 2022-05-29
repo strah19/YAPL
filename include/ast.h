@@ -53,6 +53,14 @@ enum {
 };
 
 enum {
+    AST_EQUAL,
+    AST_EQUAL_PLUS,
+    AST_EQUAL_MINUS,
+    AST_EQUAL_MULTIPLY,
+    AST_EQUAL_DIVIDE
+};
+
+enum {
     AST_FLOAT,
     AST_BOOLEAN,
     AST_STRING,
@@ -129,8 +137,9 @@ struct Ast_UnaryExpression : public Ast_Expression {
 
 struct Ast_Assignment : public Ast_Expression {
     Ast_Assignment() { type = AST_ASSIGNMENT; }
-    Ast_Assignment(Ast_Expression* expression, const char* id) : expression(expression), id(id) { type = AST_ASSIGNMENT; }
+    Ast_Assignment(Ast_Expression* expression, const char* id, int equal_type = AST_EQUAL) : expression(expression), id(id), equal_type(equal_type) { type = AST_ASSIGNMENT; }
 
+    int equal_type = AST_EQUAL;
     const char* id = nullptr;
     Ast_Expression* expression = nullptr;
 };

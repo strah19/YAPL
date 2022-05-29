@@ -292,8 +292,26 @@ void Interpreter::assignment(Ast_Expression* root) {
         obj = evaluate_expression(id);
         delete id;
     }
-    else    
-        obj = evaluate_expression(assignment->expression);
+    else {
+        obj = current_environment->get(assignment->id);
+        switch(assignment->equal_type) {
+        case AST_EQUAL: 
+            obj = evaluate_expression(assignment->expression); 
+            break;
+        case AST_EQUAL_PLUS:
+            obj = obj + evaluate_expression(assignment->expression); 
+            break;
+        case AST_EQUAL_MINUS:
+            obj = obj - evaluate_expression(assignment->expression); 
+            break;
+        case AST_EQUAL_MULTIPLY:
+            obj = obj * evaluate_expression(assignment->expression); 
+            break;
+        case AST_EQUAL_DIVIDE:
+            obj = obj / evaluate_expression(assignment->expression); 
+            break;
+        }
+    }
     current_environment->update(assignment->id, obj);
 }
 

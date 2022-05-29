@@ -74,6 +74,10 @@ Lexer::Lexer(const char* filepath) {
     symbols.insert("++", Tok::T_INC);
     symbols.insert("--", Tok::T_DEC);
     symbols.insert("->", Tok::T_DASH_ARROW);
+    symbols.insert("+=", Tok::T_EQUAL_PLUS);
+    symbols.insert("-=", Tok::T_EQUAL_MINUS);
+    symbols.insert("*=", Tok::T_EQUAL_STAR);
+    symbols.insert("/=", Tok::T_EQUAL_SLASH);
 }
 
 char Lexer::incr_char(int32_t off) {

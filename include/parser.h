@@ -64,6 +64,7 @@ private:
     int token_to_ast(Token* token);
     int token_to_ast_unary(Token* token);
     int token_to_controller(Token* token);
+    int token_to_equal(Token* token);
 private:
     std::vector<Token> tokens;
     uint32_t current = 0;

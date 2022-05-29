@@ -69,3 +69,14 @@ print "work";
 print "work";
 print "work";
 print "work";
+
+test : float = 55;
+print test;
+test += 8;
+print test;
+test /= 9;
+print test;
+test -= 2;
+print test;
+test *= 5;
+print test;

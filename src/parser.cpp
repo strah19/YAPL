@@ -271,12 +271,12 @@ Ast_Expression* Parser::expression() {
 Ast_Expression* Parser::assignment() {
     auto expr = logical();
 
-    if (match(Tok::T_EQUAL)) {
+    if (match(Tok::T_EQUAL) || match(Tok::T_EQUAL_PLUS) || match(Tok::T_EQUAL_MINUS) || match(Tok::T_EQUAL_STAR) || match(Tok::T_EQUAL_SLASH)) {
         Token* equal = peek(-1);
         auto val = assignment();
 
         if (expr->type == AST_PRIMARY && AST_CAST(Ast_PrimaryExpression, expr)->type_value == AST_ID) 
-            return AST_NEW(Ast_Assignment, val, AST_CAST(Ast_PrimaryExpression, expr)->ident);
+            return AST_NEW(Ast_Assignment, val, AST_CAST(Ast_PrimaryExpression, expr)->ident, token_to_equal(equal));
     
         parser_error(equal, "l-value in assignment is not valid");
     }
@@ -432,6 +432,17 @@ int Parser::token_to_controller(Token* token) {
     switch (token->type) {
     case Tok::T_REMIT: return AST_CONTROLLER_REMIT;
     case Tok::T_BREAK: return AST_CONTROLLER_BREAK;
+    }
+    return -1;
+}
+
+int Parser::token_to_equal(Token* token) {
+    switch (token->type) {
+    case Tok::T_EQUAL:       return AST_EQUAL;
+    case Tok::T_EQUAL_PLUS:  return AST_EQUAL_PLUS;
+    case Tok::T_EQUAL_MINUS: return AST_EQUAL_MINUS;
+    case Tok::T_EQUAL_STAR:  return AST_EQUAL_MULTIPLY;
+    case Tok::T_EQUAL_SLASH: return AST_EQUAL_DIVIDE;
     }
     return -1;
 }

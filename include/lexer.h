@@ -67,8 +67,6 @@ namespace Tok {
         T_FLOAT_CONST,
         T_PRINT, //temp
 
-        T_INC,
-        T_DEC,
         T_DASH_ARROW
     };
 }

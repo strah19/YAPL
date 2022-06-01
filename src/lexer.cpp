@@ -71,8 +71,6 @@ Lexer::Lexer(const char* filepath) {
     symbols.insert(">=", Tok::T_GTE);
     symbols.insert("!=", Tok::T_NOT_EQUAL);
     symbols.insert("==", Tok::T_COMPARE_EQUAL);
-    symbols.insert("++", Tok::T_INC);
-    symbols.insert("--", Tok::T_DEC);
     symbols.insert("->", Tok::T_DASH_ARROW);
     symbols.insert("+=", Tok::T_EQUAL_PLUS);
     symbols.insert("-=", Tok::T_EQUAL_MINUS);

@@ -162,12 +162,7 @@ void Interpreter::execute(Ast_Decleration* decleration) {
     if (current_environment->type == EN_NONE || backtrack_out_env == EN_NONE) {
         if (decleration->type == AST_EXPRESSION_STATEMENT) {
             auto expression_statement = AST_CAST(Ast_ExpressionStatement, decleration);
-            if (expression_statement->expression->type == AST_ASSIGNMENT) {
-                auto assign = AST_CAST(Ast_Assignment, expression_statement->expression);
-                if (!current_environment->get(assign->id).mutability)
-                    throw runtime_error("Can not have assignment on constant variable.");
-                assignment(expression_statement->expression); 
-            }
+            evaluate_expression(expression_statement->expression);
         }
         else if (decleration->type == AST_SCOPE) {
             Environment* previous = current_environment;
@@ -280,7 +275,7 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
     printf("\n");
 }
 
-void Interpreter::assignment(Ast_Expression* root) {
+Object Interpreter::assignment(Ast_Expression* root) {
     if (AST_CAST(Ast_Assignment, root)->expression->type == AST_ASSIGNMENT)
         assignment(AST_CAST(Ast_Assignment, root)->expression);
     auto assignment = AST_CAST(Ast_Assignment, root);
@@ -313,6 +308,7 @@ void Interpreter::assignment(Ast_Expression* root) {
         }
     }
     current_environment->update(assignment->id, obj);
+    return obj;
 }
 
 RunTimeError Interpreter::runtime_error(const char* msg) {
@@ -345,6 +341,13 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
  
         break;
     }
+    case AST_ASSIGNMENT: {
+        auto assign = AST_CAST(Ast_Assignment, expression);
+        if (!current_environment->get(assign->id).mutability)
+            throw runtime_error("Can not have assignment on constant variable.");
+        return assignment(expression); 
+        break;
+    }
     case AST_PRIMARY: {
         auto primary = AST_CAST(Ast_PrimaryExpression, expression);
 
@@ -361,6 +364,7 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
     case AST_UNARY:
         auto unary = AST_CAST(Ast_UnaryExpression, expression);
         Object value = evaluate_expression(unary->next);
+        printf("value: %d\n", value.number);
         switch (unary->op) {
         case AST_UNARY_MINUS: return -value;
         case AST_UNARY_NOT: return !value;

@@ -86,7 +86,7 @@ public:
     static void check_operators(const Object& left, const Object& right);
     static void division_zero(const Object& right);
 private:
-    void assignment(Ast_Expression* root);
+    Object assignment(Ast_Expression* root);
     void execute(Ast_Decleration* decleration);
     Object evaluate_expression(Ast_Expression* expression);
     void print_statement(Ast_PrintStatement* print);

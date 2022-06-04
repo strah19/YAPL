@@ -9,7 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 configure_file(include/config.h. include/config.h)
 
 include_directories(include)
-file(GLOB SOURCES "src/*.cpp")
+include_directories(include/interpreter)
+file(GLOB SOURCES "src/*.cpp" "src/interpreter/*.cpp")
 add_executable(YAPL ${SOURCES})
 
 target_include_directories(YAPL PUBLIC "${PROJECT_BINARY_DIR}/include")
+target_include_directories(YAPL PUBLIC "${PROJECT_BINARY_DIR}/include/interpreter")

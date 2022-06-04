@@ -5,6 +5,11 @@
         "functional": "cpp",
         "tuple": "cpp",
         "type_traits": "cpp",
-        "utility": "cpp"
-    }
+        "utility": "cpp",
+        "initializer_list": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "new": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
     end_debug_benchmark("lexer");
     printf("finished lexing %d lines of code...\n", lex.lines());
     
-    Parser parser(lex.fetch_tokens());
+    Parser parser(&lex);
     parser.parse();
 
     Interpreter interpreter;

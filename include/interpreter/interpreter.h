@@ -10,10 +10,10 @@
 
 struct RunTimeError {
     RunTimeError() = default;
-    RunTimeError(uint32_t line, const char* msg) : line(line), msg(msg) { }
+    RunTimeError(Ast ast, const char* msg) : ast(ast), msg(msg) { }
 
     const char* msg;
-    uint32_t line;
+    Ast ast;
 };
 
 class Interpreter {
@@ -23,7 +23,7 @@ public:
 
     void interpret(Ast_TranslationUnit* unit);
 
-    static RunTimeError construct_runtime_error(uint32_t line, const char* msg);
+    static RunTimeError construct_runtime_error(Ast ast, const char* msg);
     static void         print_runtime_error(const RunTimeError& runtime_error);
 private:
     void   execute(Ast_Decleration* decleration);
@@ -45,6 +45,7 @@ private:
     Object evaluate_primary(Ast_PrimaryExpression* primary);
     Object evaluate_binary(Ast_BinaryExpression* binary);
     Object evaluate_assignment(Ast_Assignment* assign);
+    Object evaluate_equal(Ast_Assignment* assign);
 
     int convert_to_interpreter_type(int ast_type);
 private:

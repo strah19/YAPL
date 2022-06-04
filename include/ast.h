@@ -13,6 +13,7 @@ enum {
     AST_BINARY,
     AST_DECLERATION,
     AST_VAR_DECLERATION,
+    AST_FUNC_DECLERATION,
     AST_ASSIGNMENT,
     AST_STATEMENT,
     AST_PRINT,
@@ -66,6 +67,7 @@ enum {
     AST_STRING,
     AST_NESTED,
     AST_ID,
+    AST_VOID,
     AST_TYPE_NONE
 };
 
@@ -89,6 +91,7 @@ struct Ast {
 
 	int type = 0;
     uint32_t line = 0;
+    const char* file;
 };
 
 struct Ast_Expression : Ast {
@@ -218,6 +221,17 @@ struct Ast_VarDecleration : public Ast_Decleration {
     const char* ident = nullptr;
 
     Ast_Expression* expression = nullptr;
+};
+
+struct Ast_FuncDecleration : public Ast_Decleration {
+    Ast_FuncDecleration() { type = AST_FUNC_DECLERATION; }
+    Ast_FuncDecleration(const char* ident, int return_type, const std::vector<Ast_VarDecleration*> args, Ast_Scope* scope) : 
+        ident(ident), return_type(return_type), args(args), scope(scope) { type = AST_FUNC_DECLERATION; }
+        
+    const char* ident = nullptr;
+    int return_type = AST_VOID;
+    std::vector<Ast_VarDecleration*> args;
+    Ast_Scope* scope = nullptr;
 };
 
 struct Ast_ConditionalController : Ast_Statement {

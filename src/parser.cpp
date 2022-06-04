@@ -21,8 +21,23 @@
 #include <stdlib.h>
 
 //error messages
-#define EXPECTED_ID "expected an identifier"
-#define EXPECTED_SEMI "expected semicolon after statement"
+#define EXPECTED_ID "Expected an identifier"
+#define EXPECTED_SEMI "Expected ';' after statement"
+#define EXPECTED_COLON "Expected ':' for variable decleration"
+#define EXPECTED_LEFT_CURLY "Expected '{' at the end of scope"
+#define EXPECTED_RIGHT_CURLY "Expected '}' at the end of scope"
+#define EXPECTED_FUNC "Expected 'func' for a function decleration"
+#define EXPECTED_LEFT_PAR "Expected '(' for function arguments"
+#define EXPECTED_RIGHT_PAR "Expected ')' for function arguments"
+
+#define UNKNOWN_TYPE "Unknown type found in variable decleration"
+#define ELIF_WITHOUT_IF "Elif without an if statement found"
+#define ELSE_WITHOUT_IF "Else without an if statement found"
+#define UNKNOWN_TOKEN "Unknown token found in expression"
+#define INVALID_LVALUE "In assignment l-value is not valid"
+
+#define AST_NEW(type, ...) \
+    static_cast<type*>(default_ast(new type(__VA_ARGS__)))
 
 static std::map<int, int> TYPES  = {
     { Tok::T_FLOAT,   AST_FLOAT   },
@@ -34,18 +49,21 @@ static std::map<int, int> SPECIFIERS = {
     { Tok::T_CONSTANT, AST_SPECIFIER_CONST }
 };
 
-#define AST_NEW(type, ...) \
-    static_cast<type*>(default_ast(new type(__VA_ARGS__)))
-
 Ast* Parser::default_ast(Ast* ast) {
     ast->line = peek()->line;
+    ast->file = filepath;
 
     return ast;
 }
 
-Parser::Parser(std::vector<Token>* tokens) : tokens(*tokens) { 
-    root =  new Ast_TranslationUnit;
-    current = 0;
+Parser::Parser(Lexer* lexer) {
+    if (lexer) { 
+        tokens = *lexer->fetch_tokens();
+        filepath = lexer->file();
+
+        root =  new Ast_TranslationUnit;
+        current = 0;
+    }
 }
 
 Parser::~Parser() {
@@ -87,7 +105,7 @@ Token* Parser::consume(int type, const char* msg) {
 }
 
 ParserError Parser::parser_error(Token* token, const char* msg) {
-    report_error("on line %d: '%s'.\n", token->line, msg);
+    report_error("In file '%s', on line %d: '%s'.\n", filepath, token->line, msg);
     return ParserError(token);
 }
 
@@ -97,8 +115,11 @@ bool Parser::is_end() {
 
 Ast_Decleration* Parser::decleration() {
     try {
-        if (peek()->type == Tok::T_IDENTIFIER && peek(1)->type == Tok::T_COLON) 
+        if (peek()->type == Tok::T_IDENTIFIER && peek(1)->type == Tok::T_COLON) {
+            if (peek(2)->type == Tok::T_FUNC)
+                return func_decleration();
             return var_decleration();
+        }
         return statement();
     }
     catch (ParserError error) {
@@ -107,10 +128,40 @@ Ast_Decleration* Parser::decleration() {
     }
 }
 
+Ast_FuncDecleration* Parser::func_decleration() {
+    consume(Tok::T_IDENTIFIER, EXPECTED_ID);
+    auto id = peek(-1)->identifier;
+    consume(Tok::T_COLON, EXPECTED_COLON);
+
+    consume(Tok::T_FUNC, EXPECTED_FUNC);
+
+    auto args = func_args();
+
+    consume(Tok::T_LCURLY, EXPECTED_LEFT_CURLY);
+    auto s = scope();
+
+    return new Ast_FuncDecleration(id, AST_VOID, args, s);
+}
+
+std::vector<Ast_VarDecleration*> Parser::func_args() {
+    std::vector<Ast_VarDecleration*> args;
+    consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
+    if (match(Tok::T_RPAR))
+        return args;
+
+    args.push_back(var_decleration());
+    while (match(Tok::T_COMMA)) {
+        
+    }
+
+    consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+    return args;
+}
+
 Ast_VarDecleration* Parser::var_decleration() {
     consume(Tok::T_IDENTIFIER, EXPECTED_ID);
     auto id = peek(-1)->identifier;
-    consume(Tok::T_COLON, "expected : for variable decleration");
+    consume(Tok::T_COLON, EXPECTED_COLON);
 
     int specifiers = AST_SPECIFIER_NONE;
     if (SPECIFIERS.find(peek()->type) != SPECIFIERS.end()) {
@@ -124,7 +175,7 @@ Ast_VarDecleration* Parser::var_decleration() {
         match(peek()->type);
     }
     else
-        throw parser_error(peek(), "unknown variable type");
+        throw parser_error(peek(), UNKNOWN_TYPE);
 
     Ast_Expression* expr = nullptr;
     if (match(Tok::T_EQUAL))
@@ -139,8 +190,8 @@ Ast_Statement* Parser::statement() {
     //***********************REFACTOR***********************//
     if (match(Tok::T_PRINT)) return print_statement();
     else if (match(Tok::T_IF)) return conditional_statement();
-    else if (match(Tok::T_ELIF)) throw parser_error(peek(), "Elif without an if");
-    else if (match(Tok::T_ELSE)) throw parser_error(peek(), "else without an if");
+    else if (match(Tok::T_ELIF)) throw parser_error(peek(), ELIF_WITHOUT_IF);
+    else if (match(Tok::T_ELSE)) throw parser_error(peek(), ELSE_WITHOUT_IF);
     else if (match(Tok::T_LCURLY)) return scope();
     else if (match(Tok::T_WHILE)) return while_loop();
     else if (match(Tok::T_REMIT) || match(Tok::T_BREAK)) return controller_statement();
@@ -212,13 +263,14 @@ Ast_ElseStatement* Parser::else_statement() {
     return AST_NEW(Ast_ElseStatement, s);
 }
 
+//Does not consume or match LCURLY!
 Ast_Scope* Parser::scope() {
     Ast_Scope* s = AST_NEW(Ast_Scope);
     while (!check(Tok::T_RCURLY) && !is_end()) {
         s->declerations.push_back(decleration());
     }
 
-    consume(Tok::T_RCURLY, "Expected '}' for the end of a block");
+    consume(Tok::T_RCURLY, EXPECTED_RIGHT_CURLY);
     return s;
 }
 
@@ -278,7 +330,7 @@ Ast_Expression* Parser::assignment() {
         if (expr->type == AST_PRIMARY && AST_CAST(Ast_PrimaryExpression, expr)->type_value == AST_ID) 
             return AST_NEW(Ast_Assignment, val, AST_CAST(Ast_PrimaryExpression, expr)->ident, token_to_equal(equal));
     
-        parser_error(equal, "l-value in assignment is not valid");
+        parser_error(equal, INVALID_LVALUE);
     }
 
     return expr;
@@ -396,7 +448,7 @@ Ast_Expression* Parser::primary() {
         break;
     }
     default:
-        parser_error(peek(), "Unknown token inside an expression");
+        parser_error(peek(), UNKNOWN_TOKEN);
     }
 
     return prime;

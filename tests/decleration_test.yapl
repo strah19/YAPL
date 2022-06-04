@@ -83,3 +83,7 @@ print test;
 
 print (test += 3);
 print test;
+
+foo : func() {
+
+}

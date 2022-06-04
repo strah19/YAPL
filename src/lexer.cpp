@@ -43,8 +43,8 @@ enum {
  * 
  * @param const char* The path to the source file.
  */
-Lexer::Lexer(const char* filepath) {
-    load(filepath);
+Lexer::Lexer(const char* filepath) : filepath(filepath) {
+    load();
 
     keywords.insert("if", Tok::T_IF);
     keywords.insert("else", Tok::T_ELSE);
@@ -58,7 +58,7 @@ Lexer::Lexer(const char* filepath) {
     keywords.insert("return", Tok::T_RETURN);
     keywords.insert("print", Tok::T_PRINT);
     keywords.insert("string", Tok::T_STRING);
-    keywords.insert("def", Tok::T_DEF);
+    keywords.insert("func", Tok::T_FUNC);
     keywords.insert("true", Tok::T_TRUE);
     keywords.insert("false", Tok::T_FALSE);
     keywords.insert("constant", Tok::T_CONSTANT);
@@ -319,7 +319,7 @@ void Lexer::print_from_type(int type) {
     }
 }
 
-void Lexer::load(const char* filepath) {
+void Lexer::load() {
     struct stat sb{};
 
     FILE* input_file = fopen(filepath, "r");

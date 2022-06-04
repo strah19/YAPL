@@ -50,6 +50,16 @@ void report_error(const char* fmt, ...) {
     va_end(args);
 }
 
+void report_runtime_error(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    printf("\033[0;31mYAPL runtime error: \033[0m");    
+    vprintf(fmt, args);
+
+    va_end(args);
+}
+
 void begin_custom_error() {
     printf("\033[0;31m");
 }

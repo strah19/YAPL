@@ -18,8 +18,8 @@
 #include "interpreter.h"
 #include "err.h"
 
-#define OBJECT_ERRORS(ast, obj) if (obj.found_errors()) throw Interpreter::construct_runtime_error(ast->line, OBJ_ERROR_MESSAGES[obj.error]);
-#define ENVIRONMENT_ERRORS(ast, err) if (Environment::found_errors(err)) throw Interpreter::construct_runtime_error(ast->line, EN_ERROR_MESSAGES[err]);
+#define OBJECT_ERRORS(ast, obj) if (obj.found_errors()) throw Interpreter::construct_runtime_error(*ast, OBJ_ERROR_MESSAGES[obj.error]);
+#define ENVIRONMENT_ERRORS(ast, err) if (Environment::found_errors(err)) throw Interpreter::construct_runtime_error(*ast, EN_ERROR_MESSAGES[err]);
 
 static bool is_if_or_elif(int type);
 
@@ -139,7 +139,7 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
         obj.mutability = (decleration->specifiers & AST_SPECIFIER_CONST) ? false : true;
         current_environment->define(decleration->ident, obj);
     }
-    else if ((decleration->specifiers & AST_SPECIFIER_CONST)) throw construct_runtime_error(decleration->line, "constant variable must have an expression.");
+    else if ((decleration->specifiers & AST_SPECIFIER_CONST)) throw construct_runtime_error(*decleration, "constant variable must have an expression.");
 }
 
 void Interpreter::print_statement(Ast_PrintStatement* print) {
@@ -175,38 +175,32 @@ Object Interpreter::assignment(Ast_Assignment* assign) {
         OBJECT_ERRORS(assign, obj);
         delete id;
     }
-    else {
-        obj = current_environment->get(assign->id);
-        OBJECT_ERRORS(assign, obj);
-
-        switch(assign->equal_type) {
-        case AST_EQUAL: 
-            obj = evaluate_expression(assign->expression); 
-            break;
-        case AST_EQUAL_PLUS:
-            obj = obj + evaluate_expression(assign->expression); 
-            break;
-        case AST_EQUAL_MINUS:
-            obj = obj - evaluate_expression(assign->expression); 
-            break;
-        case AST_EQUAL_MULTIPLY:
-            obj = obj * evaluate_expression(assign->expression); 
-            break;
-        case AST_EQUAL_DIVIDE:
-            obj = obj / evaluate_expression(assign->expression); 
-            break;
-        }
-    }
+    else 
+        obj = evaluate_equal(assign);
     ENVIRONMENT_ERRORS(assign, current_environment->update(assign->id, obj));
     return obj;
 }
 
-RunTimeError Interpreter::construct_runtime_error(uint32_t line, const char* msg) {
-    return RunTimeError(line, msg);
+Object Interpreter::evaluate_equal(Ast_Assignment* assign) {
+    Object obj = current_environment->get(assign->id);
+    OBJECT_ERRORS(assign, obj);
+
+    switch(assign->equal_type) {
+    case AST_EQUAL:          return evaluate_expression(assign->expression); 
+    case AST_EQUAL_PLUS:     return obj + evaluate_expression(assign->expression); 
+    case AST_EQUAL_MINUS:    return obj - evaluate_expression(assign->expression); 
+    case AST_EQUAL_MULTIPLY: return obj * evaluate_expression(assign->expression); 
+    case AST_EQUAL_DIVIDE:   return obj / evaluate_expression(assign->expression); 
+    default:                 return obj;
+    }
+}
+
+RunTimeError Interpreter::construct_runtime_error(Ast ast, const char* msg) {
+    return RunTimeError(ast, msg);
 }
 
 void Interpreter::print_runtime_error(const RunTimeError& runtime_error) {
-    report_error("runtime error on line %d: '%s'\n", runtime_error.line, runtime_error.msg);
+    report_runtime_error("In file '%s' on line %d: '%s'.\n", runtime_error.ast.file, runtime_error.ast.line, runtime_error.msg);
 }
 
 Object Interpreter::evaluate_expression(Ast_Expression* expression) {
@@ -270,7 +264,7 @@ Object Interpreter::evaluate_assignment(Ast_Assignment* assign) {
     Object obj = current_environment->get(assign->id);
     OBJECT_ERRORS(assign, obj);
     if (!obj.mutability)
-        throw construct_runtime_error(assign->line, "Can not have assignment on constant variable.");
+        throw construct_runtime_error(*assign, "Can not have assignment on constant variable.");
     return assignment(assign); 
 }
 

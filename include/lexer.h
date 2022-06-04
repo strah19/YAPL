@@ -55,7 +55,7 @@ namespace Tok {
         T_FALSE,
         T_REMIT,
         T_TRUE,
-        T_DEF,
+        T_FUNC,
         
         T_FLOAT,
         T_BOOLEAN,
@@ -92,6 +92,7 @@ public:
     Lexer(const char* filepath);
     void lex();
     void log();
+    const char* file() { return filepath; }
 
     void log_token(Token& token, uint32_t i);
     static void print_token(Token& token);
@@ -101,7 +102,7 @@ public:
 
     inline uint32_t lines() const { return current_line; }
 private:
-    void load(const char* filepath);
+    void load();
 
     void newline();
     void multiline_comment_beg();

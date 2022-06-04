@@ -17,7 +17,7 @@ struct ParserError {
 class Parser {
 public:
     Parser() = default;
-    Parser(std::vector<Token>* tokens);
+    Parser(Lexer* lexer);
     ~Parser();
 
     void parse();
@@ -47,6 +47,8 @@ private:
     Ast_PrintStatement*       print_statement();
     Ast_Expression*           assignment();
     Ast_VarDecleration*       var_decleration();
+    Ast_FuncDecleration*      func_decleration();
+    std::vector<Ast_VarDecleration*> func_args();
     Ast_Decleration*          decleration();
     Ast_Statement*            statement(); 
     Ast_Scope*                scope();
@@ -69,6 +71,7 @@ private:
     std::vector<Token> tokens;
     uint32_t current = 0;
     Ast_TranslationUnit* root = nullptr;
+    const char* filepath = nullptr;
 };
 
 #endif // !PARSER_H

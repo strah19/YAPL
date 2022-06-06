@@ -50,7 +50,15 @@ void Interpreter::execute(Ast_Decleration* decleration) {
             while_loop(AST_CAST(Ast_WhileLoop, decleration)); 
         else if (decleration->type == AST_CONDITIONAL_CONTROLLER) 
             conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
+        else if (decleration->type == AST_FUNC_DECLERATION) 
+            function_decleration(AST_CAST(Ast_FuncDecleration, decleration));
     }
+}
+
+void Interpreter::function_decleration(Ast_FuncDecleration* func) {
+    if (current_environment->func_is_defined(func->ident) == EN_ERROR_NONE) 
+        throw construct_runtime_error(*func, "Function can only be defined once");
+    current_environment->func_define(func->ident, func);
 }
 
 void Interpreter::scope(Ast_Decleration* decleration) {
@@ -126,7 +134,7 @@ void Interpreter::conditional_controller(Ast_ConditionalController* controller) 
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
-    current_environment->define(decleration->ident, Object());
+    current_environment->var_define(decleration->ident, Object());
     if (decleration->expression) {
         Object obj;
         if (decleration->expression) {
@@ -137,7 +145,7 @@ void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
             obj.type = convert_to_interpreter_type(decleration->type_value);
             
         obj.mutability = (decleration->specifiers & AST_SPECIFIER_CONST) ? false : true;
-        current_environment->define(decleration->ident, obj);
+        current_environment->var_define(decleration->ident, obj);
     }
     else if ((decleration->specifiers & AST_SPECIFIER_CONST)) throw construct_runtime_error(*decleration, "constant variable must have an expression.");
 }
@@ -166,7 +174,7 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
 Object Interpreter::assignment(Ast_Assignment* assign) {
     if (assign->expression->type == AST_ASSIGNMENT)
         assignment(AST_CAST(Ast_Assignment, assign->expression));
-    ENVIRONMENT_ERRORS(assign, current_environment->is_defined(assign->id));
+    ENVIRONMENT_ERRORS(assign, current_environment->var_is_defined(assign->id));
 
     Object obj;
     if (assign->expression->type == AST_ASSIGNMENT) {
@@ -177,12 +185,12 @@ Object Interpreter::assignment(Ast_Assignment* assign) {
     }
     else 
         obj = evaluate_equal(assign);
-    ENVIRONMENT_ERRORS(assign, current_environment->update(assign->id, obj));
+    ENVIRONMENT_ERRORS(assign, current_environment->var_update(assign->id, obj));
     return obj;
 }
 
 Object Interpreter::evaluate_equal(Ast_Assignment* assign) {
-    Object obj = current_environment->get(assign->id);
+    Object obj = current_environment->var_get(assign->id);
     OBJECT_ERRORS(assign, obj);
 
     switch(assign->equal_type) {
@@ -231,14 +239,28 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
     case AST_STRING:  return primary->string;
     case AST_BOOLEAN: return Object(primary->boolean, BOOLEAN);
     case AST_ID: {
-        Object obj  = current_environment->get(primary->ident);
+        Object obj  = current_environment->var_get(primary->ident);
         OBJECT_ERRORS(primary, obj);
         return obj;
     }   
     case AST_FUNC_CALL: {
-        
+        Object obj =  evaluate_function_call(primary->call);
+        OBJECT_ERRORS(primary, obj);
+        return obj;
     }
     default: return Object(OBJ_ERROR_UNKNOWN_TYPE);
+    }
+}
+
+Object Interpreter::evaluate_function_call(Ast_FunctionCall* call) {
+    if (current_environment->func_is_defined(call->ident) == EN_ERROR_UNDEFINED_FUNC) 
+        return Object(OBJ_ERROR_UNDEFINED_FUNC);
+    
+    Ast_FuncDecleration* dec = current_environment->func_get(call->ident);
+    if (dec) {
+        backtrack_controller = EN_FUNC;
+        scope(dec->scope);
+        backtrack_controller = EN_NONE;
     }
 }
 
@@ -264,7 +286,7 @@ Object Interpreter::evaluate_binary(Ast_BinaryExpression* binary) {
 }
 
 Object Interpreter::evaluate_assignment(Ast_Assignment* assign) {
-    Object obj = current_environment->get(assign->id);
+    Object obj = current_environment->var_get(assign->id);
     OBJECT_ERRORS(assign, obj);
     if (!obj.mutability)
         throw construct_runtime_error(*assign, "Can not have assignment on constant variable.");

@@ -32,6 +32,7 @@ private:
     void   print_statement(Ast_PrintStatement* print);
     void   conditional_controller(Ast_ConditionalController* controller);
     void   variable_decleration(Ast_VarDecleration* decleration);
+    void   function_decleration(Ast_FuncDecleration* func);
 
     void if_statement(Ast_IfStatement* conditional);
     bool conditional_statement(Ast_ConditionalStatement* conditional);
@@ -46,6 +47,7 @@ private:
     Object evaluate_binary(Ast_BinaryExpression* binary);
     Object evaluate_assignment(Ast_Assignment* assign);
     Object evaluate_equal(Ast_Assignment* assign);
+    Object evaluate_function_call(Ast_FunctionCall* call);
 
     int convert_to_interpreter_type(int ast_type);
 private:

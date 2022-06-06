@@ -17,7 +17,8 @@ enum {
     OBJ_ERROR_DIVIDE_ZERO,
     OBJ_ERROR_NEGATE,
     OBJ_ERROR_UNDEFINED_VAR,
-    OBJ_ERROR_UNKNOWN_OPERATOR
+    OBJ_ERROR_UNKNOWN_OPERATOR,
+    OBJ_ERROR_UNDEFINED_FUNC
 };
 
 static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
@@ -27,7 +28,8 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
     { OBJ_ERROR_DIVIDE_ZERO, "Cannot divide by zero" },
     { OBJ_ERROR_NEGATE, "Type cannot be negated" },
     { OBJ_ERROR_UNDEFINED_VAR, "Undefined variable" }, 
-    { OBJ_ERROR_UNKNOWN_OPERATOR, "Unknown operator found in expression" }
+    { OBJ_ERROR_UNKNOWN_OPERATOR, "Unknown operator found in expression" },
+    { OBJ_ERROR_UNDEFINED_FUNC, "Undefined function" }
 };
 
 struct Object {

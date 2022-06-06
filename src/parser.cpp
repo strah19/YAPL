@@ -151,7 +151,7 @@ std::vector<Ast_VarDecleration*> Parser::func_args() {
 
     args.push_back(var_decleration());
     while (match(Tok::T_COMMA)) {
-        
+        //args go here
     }
 
     consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);

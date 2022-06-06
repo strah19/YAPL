@@ -85,7 +85,7 @@ print (test += 3);
 print test;
 
 foo : func() {
-
+    print "in function";
 }
 
 foo();

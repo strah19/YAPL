@@ -17,7 +17,6 @@ if VOLTAGE > load_resistance {
     temp : float = 3;
     print "var in if: ", temp;
     if 1 == 1 {
-        remit;
         print "this will not be called";
     }
     print "this will be called";
@@ -85,7 +84,8 @@ print (test += 3);
 print test;
 
 foo : func() {
-    print "in function";
+    o : float = 2;
+    print o + test;
 }
 
 foo();

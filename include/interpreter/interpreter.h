@@ -36,10 +36,8 @@ private:
 
     void if_statement(Ast_IfStatement* conditional);
     bool conditional_statement(Ast_ConditionalStatement* conditional);
-    void execute_conditions(Ast_Scope* scope); 
 
     void while_loop(Ast_WhileLoop* loop);   
-    void execute_loops(Ast_Scope* scope); 
 
     Object evaluate_expression(Ast_Expression* expression);
     Object evaluate_unary(Ast_UnaryExpression* unary);
@@ -53,7 +51,6 @@ private:
 private:
     Environment environment;
     Environment* current_environment;
-    int backtrack_controller = EN_NONE;
 };
 
 #endif // !INTERPRETER_H

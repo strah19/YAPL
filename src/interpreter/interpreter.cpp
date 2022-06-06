@@ -35,24 +35,22 @@ void Interpreter::interpret(Ast_TranslationUnit* unit) {
 }
 
 void Interpreter::execute(Ast_Decleration* decleration) {
-    if (current_environment->type == EN_NONE || backtrack_controller == EN_NONE) {
-        if (decleration->type == AST_EXPRESSION_STATEMENT) 
-            evaluate_expression(AST_CAST(Ast_ExpressionStatement, decleration)->expression);
-        else if (decleration->type == AST_SCOPE)
-            scope(decleration);
-        else if (decleration->type == AST_PRINT) 
-            print_statement(AST_CAST(Ast_PrintStatement, decleration));
-        else if (decleration->type == AST_VAR_DECLERATION) 
-            variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
-        else if (decleration->type == AST_IF) 
-            if_statement(AST_CAST(Ast_IfStatement, decleration));
-        else if (decleration->type == AST_WHILE)
-            while_loop(AST_CAST(Ast_WhileLoop, decleration)); 
-        else if (decleration->type == AST_CONDITIONAL_CONTROLLER) 
-            conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
-        else if (decleration->type == AST_FUNC_DECLERATION) 
-            function_decleration(AST_CAST(Ast_FuncDecleration, decleration));
-    }
+    if (decleration->type == AST_EXPRESSION_STATEMENT) 
+        evaluate_expression(AST_CAST(Ast_ExpressionStatement, decleration)->expression);
+    else if (decleration->type == AST_SCOPE)
+        scope(decleration);
+    else if (decleration->type == AST_PRINT) 
+        print_statement(AST_CAST(Ast_PrintStatement, decleration));
+    else if (decleration->type == AST_VAR_DECLERATION) 
+        variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
+    else if (decleration->type == AST_IF) 
+        if_statement(AST_CAST(Ast_IfStatement, decleration));
+    else if (decleration->type == AST_WHILE)
+        while_loop(AST_CAST(Ast_WhileLoop, decleration)); 
+    else if (decleration->type == AST_CONDITIONAL_CONTROLLER) 
+        conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
+    else if (decleration->type == AST_FUNC_DECLERATION) 
+        function_decleration(AST_CAST(Ast_FuncDecleration, decleration));
 }
 
 void Interpreter::function_decleration(Ast_FuncDecleration* func) {
@@ -79,17 +77,11 @@ void Interpreter::while_loop(Ast_WhileLoop* loop) {
     OBJECT_ERRORS(loop, obj);
 
     while (obj.type == BOOLEAN && obj.boolean) {
-        execute_loops(loop->scope);
+         execute(loop->scope);
 
         obj = evaluate_expression(loop->condition);
         OBJECT_ERRORS(loop, obj);
     }
-}
-
-void Interpreter::execute_loops(Ast_Scope* scope) {
-    backtrack_controller = EN_LOOP;
-    execute(scope);
-    backtrack_controller = EN_NONE;
 }
 
 void Interpreter::if_statement(Ast_IfStatement* conditional) {
@@ -98,7 +90,7 @@ void Interpreter::if_statement(Ast_IfStatement* conditional) {
         if (is_if_or_elif(current->type) && conditional_statement(current))
             break;
         else if (current->type == AST_ELSE) {
-            execute_conditions(conditional->scope);
+            execute(conditional->scope);
             break;
         }
         current = current->next;
@@ -114,23 +106,14 @@ bool Interpreter::conditional_statement(Ast_ConditionalStatement* conditional) {
     OBJECT_ERRORS(conditional, obj);
 
     if (obj.type == BOOLEAN && obj.boolean) {
-        execute_conditions(conditional->scope);
+        execute(conditional->scope);
         return true;
     }
     return false;
 }
 
-void Interpreter::execute_conditions(Ast_Scope* scope) {
-    backtrack_controller = EN_CONDITION;
-    execute(scope);
-    backtrack_controller = EN_NONE;
-}
-
 void Interpreter::conditional_controller(Ast_ConditionalController* controller) {
-    switch (controller->controller) {
-    case AST_CONTROLLER_REMIT: current_environment->type = EN_CONDITION; break;
-    case AST_CONTROLLER_BREAK: current_environment->type = EN_LOOP; break;
-    }
+    
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
@@ -257,11 +240,10 @@ Object Interpreter::evaluate_function_call(Ast_FunctionCall* call) {
         return Object(OBJ_ERROR_UNDEFINED_FUNC);
     
     Ast_FuncDecleration* dec = current_environment->func_get(call->ident);
-    if (dec) {
-        backtrack_controller = EN_FUNC;
+    if (dec) 
         scope(dec->scope);
-        backtrack_controller = EN_NONE;
-    }
+
+    return Object(OBJ_ERROR_NONE);
 }
 
 Object Interpreter::evaluate_binary(Ast_BinaryExpression* binary) {

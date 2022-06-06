@@ -6,13 +6,6 @@
 #include <map>
 
 enum {
-    EN_CONDITION,
-    EN_LOOP,
-    EN_FUNC,
-    EN_NONE
-};
-
-enum {
     EN_ERROR_NONE,
     EN_ERROR_UNDEFINED_VAR,
     EN_ERROR_UNDEFINED_FUNC,
@@ -45,7 +38,6 @@ struct Environment {
     std::map<std::string, Object> values; 
     Environment* next = nullptr;
     Environment* previous = nullptr;
-    int type = EN_NONE;
 };
 
 #endif // !ENVIRONMENT_H

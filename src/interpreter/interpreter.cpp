@@ -235,6 +235,9 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
         OBJECT_ERRORS(primary, obj);
         return obj;
     }   
+    case AST_FUNC_CALL: {
+        
+    }
     default: return Object(OBJ_ERROR_UNKNOWN_TYPE);
     }
 }

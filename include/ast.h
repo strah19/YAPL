@@ -67,6 +67,7 @@ enum {
     AST_STRING,
     AST_NESTED,
     AST_ID,
+    AST_FUNC_CALL,
     AST_VOID,
     AST_TYPE_NONE
 };
@@ -85,6 +86,7 @@ enum {
 struct Ast;
 struct Ast_Expression;
 struct Ast_Scope;
+struct Ast_VarDecleration;
 
 struct Ast {
     Ast() { }
@@ -96,6 +98,13 @@ struct Ast {
 
 struct Ast_Expression : Ast {
     Ast_Expression() { type = AST_EXPRESSION; }
+};
+
+struct Ast_FunctionCall {
+    Ast_FunctionCall(const char* ident, const   std::vector<Ast_VarDecleration*>& args) : ident(ident), args(args) { }
+
+    const char* ident;
+    std::vector<Ast_VarDecleration*> args;
 };
 
 struct Ast_PrimaryExpression : public Ast_Expression {
@@ -110,6 +119,7 @@ struct Ast_PrimaryExpression : public Ast_Expression {
         const char* string;
         bool boolean;
         
+        Ast_FunctionCall* call;
         Ast_Expression* nested;
     };
 };

@@ -428,9 +428,23 @@ Ast_Expression* Parser::primary() {
         break;
     }
     case Tok::T_IDENTIFIER: {
-        prime->ident = peek()->identifier;
-        prime->type_value = AST_ID;
+        const char* ident = peek()->identifier;
         match(Tok::T_IDENTIFIER);
+
+        prime->type_value = (peek()->type == Tok::T_LPAR) ? AST_FUNC_CALL : AST_ID;
+        if (prime->type_value == AST_FUNC_CALL) {
+            std::vector<Ast_VarDecleration*> args;
+            consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
+
+            //Args
+
+            consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+            prime->call = new Ast_FunctionCall(ident, args);
+        }
+        else {
+            prime->ident = ident;
+        }
+        
         break;
     }
     case Tok::T_LPAR: {

@@ -57,9 +57,8 @@ int Environment::is_defined(const char* name) {
             return EN_ERROR_NONE;
     }
     
-    if (!found(name)) {
+    if (!found(name)) 
         return EN_ERROR_UNDEFINED_VAR;
-    }
     return EN_ERROR_NONE;
 }
 

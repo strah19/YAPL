@@ -87,3 +87,6 @@ print test;
 foo : func() {
 
 }
+
+foo();
+

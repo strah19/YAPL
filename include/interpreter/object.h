@@ -26,7 +26,7 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
     { OBJ_ERROR_MUST_BE_NUMBERS, "Operands in expression must be numbers" },
     { OBJ_ERROR_DIVIDE_ZERO, "Cannot divide by zero" },
     { OBJ_ERROR_NEGATE, "Type cannot be negated" },
-    { OBJ_ERROR_UNDEFINED_VAR, "Undefined variable" },
+    { OBJ_ERROR_UNDEFINED_VAR, "Undefined variable" }, 
     { OBJ_ERROR_UNKNOWN_OPERATOR, "Unknown operator found in expression" }
 };
 

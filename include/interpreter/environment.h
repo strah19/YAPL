@@ -1,6 +1,7 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include "ast.h"
 #include "object.h"
 #include <map>
 

@@ -88,5 +88,9 @@ foo : func() {
     print o + test;
 }
 
-foo();
+fighters : func() {
+    print "fighters";
+}
 
+foo();
+fighters();

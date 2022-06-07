@@ -20,13 +20,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <fstream>
+#include <map>
 
 #include "lexer.h"
 #include "err.h"
 #include "symtable.h"
 
-static SymTable keywords;
-static SymTable symbols;
+static SymTable<std::string, int> keywords;
+static SymTable<std::string, int> symbols;
 
 // different types of general tokens used when lexing
 enum {
@@ -46,36 +47,36 @@ enum {
 Lexer::Lexer(const char* filepath) : filepath(filepath) {
     load();
 
-    keywords.insert("if", Tok::T_IF);
-    keywords.insert("else", Tok::T_ELSE);
-    keywords.insert("elif", Tok::T_ELIF);
-    keywords.insert("while", Tok::T_WHILE);
-    keywords.insert("continue", Tok::T_CONTINUE);
-    keywords.insert("return", Tok::T_RETURN);
-    keywords.insert("break", Tok::T_BREAK);
-    keywords.insert("boolean", Tok::T_BOOLEAN);
-    keywords.insert("float", Tok::T_FLOAT);
-    keywords.insert("return", Tok::T_RETURN);
-    keywords.insert("print", Tok::T_PRINT);
-    keywords.insert("string", Tok::T_STRING);
-    keywords.insert("func", Tok::T_FUNC);
-    keywords.insert("true", Tok::T_TRUE);
-    keywords.insert("false", Tok::T_FALSE);
-    keywords.insert("constant", Tok::T_CONSTANT);
-    keywords.insert("remit", Tok::T_REMIT);
-    keywords.insert("and", Tok::T_AND);
-    keywords.insert("or", Tok::T_OR);
-    keywords.insert("for", Tok::T_FOR);
+    keywords.define("if", Tok::T_IF);
+    keywords.define("else", Tok::T_ELSE);
+    keywords.define("elif", Tok::T_ELIF);
+    keywords.define("while", Tok::T_WHILE);
+    keywords.define("continue", Tok::T_CONTINUE);
+    keywords.define("return", Tok::T_RETURN);
+    keywords.define("break", Tok::T_BREAK);
+    keywords.define("boolean", Tok::T_BOOLEAN);
+    keywords.define("float", Tok::T_FLOAT);
+    keywords.define("return", Tok::T_RETURN);
+    keywords.define("print", Tok::T_PRINT);
+    keywords.define("string", Tok::T_STRING);
+    keywords.define("func", Tok::T_FUNC);
+    keywords.define("true", Tok::T_TRUE);
+    keywords.define("false", Tok::T_FALSE);
+    keywords.define("constant", Tok::T_CONSTANT);
+    keywords.define("remit", Tok::T_REMIT);
+    keywords.define("and", Tok::T_AND);
+    keywords.define("or", Tok::T_OR);
+    keywords.define("for", Tok::T_FOR);
 
-    symbols.insert("<=", Tok::T_LTE);
-    symbols.insert(">=", Tok::T_GTE);
-    symbols.insert("!=", Tok::T_NOT_EQUAL);
-    symbols.insert("==", Tok::T_COMPARE_EQUAL);
-    symbols.insert("->", Tok::T_DASH_ARROW);
-    symbols.insert("+=", Tok::T_EQUAL_PLUS);
-    symbols.insert("-=", Tok::T_EQUAL_MINUS);
-    symbols.insert("*=", Tok::T_EQUAL_STAR);
-    symbols.insert("/=", Tok::T_EQUAL_SLASH);
+    symbols.define("<=", Tok::T_LTE);
+    symbols.define(">=", Tok::T_GTE);
+    symbols.define("!=", Tok::T_NOT_EQUAL);
+    symbols.define("==", Tok::T_COMPARE_EQUAL);
+    symbols.define("->", Tok::T_DASH_ARROW);
+    symbols.define("+=", Tok::T_EQUAL_PLUS);
+    symbols.define("-=", Tok::T_EQUAL_MINUS);
+    symbols.define("*=", Tok::T_EQUAL_STAR);
+    symbols.define("/=", Tok::T_EQUAL_SLASH);
 }
 
 char Lexer::incr_char(int32_t off) {
@@ -127,9 +128,8 @@ void Lexer::multiline_comment_end() {
 
 void Lexer::create_sym_token() {
     for (int i = 0; i < current.size(); i++) {
-        Entry* ent = symbols.look_up(current.c_str());
-        if (ent) {
-            tokens.push_back(Token(ent->type, current_line));
+        if (symbols.found(current)) {
+            tokens.push_back(Token(symbols.get(current), current_line));
             return;
         }
     }
@@ -168,9 +168,8 @@ void Lexer::lex() {
         multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
             if (current_type == IDENTIFIER && !is_identifier(stream[current_index])) {
-                Entry* ent = keywords.look_up(current.c_str());
-                if (ent) {
-                    tokens.push_back(Token(ent->type, current_line));
+                if (keywords.found(current)) {
+                    tokens.push_back(Token(keywords.get(current), current_line));
                     reset();
                 }
                 else if (!isdigit(stream[current_index])) {
@@ -257,13 +256,7 @@ void Lexer::log_token(Token& token, uint32_t i) {
  * @param Token The token.
  */
 void Lexer::print_token(Token& token) {
-    Entry* ent = keywords.look_up_by_type(token.type);
-    if (ent)
-        printf("%s", ent->name);
-
-    ent = symbols.look_up_by_type(token.type);
-    if (ent)
-        printf("%s", ent->name);
+    log_keywords_symbols(token.type);
 
     switch (token.type) {
     case Tok::T_IDENTIFIER: {
@@ -290,13 +283,7 @@ void Lexer::print_token(Token& token) {
 }
 
 void Lexer::print_from_type(int type) {
-    Entry* ent = keywords.look_up_by_type(type);
-    if (ent)
-        printf("%s", ent->name);
-
-    ent = symbols.look_up_by_type(type);
-    if (ent)
-        printf("%s", ent->name);
+    log_keywords_symbols(type);
 
     switch (type) {
     case Tok::T_IDENTIFIER: {
@@ -317,6 +304,17 @@ void Lexer::print_from_type(int type) {
         break;
     }
     }
+}
+
+void Lexer::log_keywords_symbols(int type) {
+    try {
+        std::string entry = keywords.get_key(type);
+        printf("%s", entry.c_str());
+
+        entry = symbols.get_key(type);
+        printf("%s", entry.c_str());
+    }
+    catch (SymTableError error) { }
 }
 
 void Lexer::load() {

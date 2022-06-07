@@ -140,7 +140,7 @@ Ast_FuncDecleration* Parser::func_decleration() {
     consume(Tok::T_LCURLY, EXPECTED_LEFT_CURLY);
     auto s = scope();
 
-    return new Ast_FuncDecleration(id, AST_VOID, args, s);
+    return AST_NEW(Ast_FuncDecleration, id, AST_VOID, args, s);
 }
 
 std::vector<Ast_VarDecleration*> Parser::func_args() {

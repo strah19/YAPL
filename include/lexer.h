@@ -94,9 +94,10 @@ public:
     void log();
     const char* file() { return filepath; }
 
-    void log_token(Token& token, uint32_t i);
+    void        log_token(Token& token, uint32_t i);
     static void print_token(Token& token);
     static void print_from_type(int type);
+    static void log_keywords_symbols(int type);
 
     std::vector<Token>* fetch_tokens() { return &tokens; }
 
@@ -113,10 +114,11 @@ private:
     bool is_spec_char(char c);
     void remove_whitespaces(char* s);
 
-    void create_sym_token();
-    void move();
+    void     create_sym_token();
+    void     move();
     uint32_t get_type(char c);
-    void reset();
+    void     reset();
+
 public:
     std::vector<Token> tokens;
     const char* filepath = nullptr;

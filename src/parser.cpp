@@ -137,10 +137,20 @@ Ast_FuncDecleration* Parser::func_decleration() {
 
     auto args = func_args();
 
+    int return_type = AST_VOID;
+    if (match(Tok::T_DASH_ARROW)) {
+        if (TYPES.find(peek()->type) != TYPES.end()) {
+            return_type = TYPES[peek()->type];
+            match(peek()->type);
+        }
+        else
+            throw parser_error(peek(), UNKNOWN_TYPE);
+    }
+
     consume(Tok::T_LCURLY, EXPECTED_LEFT_CURLY);
     auto s = scope();
 
-    return AST_NEW(Ast_FuncDecleration, id, AST_VOID, args, s);
+    return AST_NEW(Ast_FuncDecleration, id, return_type, args, s);
 }
 
 std::vector<Ast_VarDecleration*> Parser::func_args() {

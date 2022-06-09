@@ -24,10 +24,41 @@
 
 #include "lexer.h"
 #include "err.h"
-#include "symtable.h"
 
-static SymTable<std::string, int> keywords;
-static SymTable<std::string, int> symbols;
+static std::map<std::string, int> keywords = {
+    { "if", Tok::T_IF },
+    { "else", Tok::T_ELSE },
+    { "elif", Tok::T_ELIF },
+    { "while", Tok::T_WHILE },
+    { "continue", Tok::T_CONTINUE },
+    { "return", Tok::T_RETURN },
+    { "break", Tok::T_BREAK },
+    { "boolean", Tok::T_BOOLEAN },
+    { "float", Tok::T_FLOAT },
+    { "return", Tok::T_RETURN },
+    { "print", Tok::T_PRINT },
+    { "string", Tok::T_STRING },
+    { "func", Tok::T_FUNC },
+    { "true", Tok::T_TRUE },
+    { "false", Tok::T_FALSE },
+    { "constant", Tok::T_CONSTANT },
+    { "remit", Tok::T_REMIT },
+    { "and", Tok::T_AND },
+    { "or", Tok::T_OR },
+    { "for", Tok::T_FOR }
+};
+
+static std::map<std::string, int> symbols = {
+    { "<=", Tok::T_LTE },
+    { ">=", Tok::T_GTE },
+    { "!=", Tok::T_NOT_EQUAL },
+    { "==", Tok::T_COMPARE_EQUAL },
+    { "->", Tok::T_DASH_ARROW },
+    { "+=", Tok::T_EQUAL_PLUS },
+    { "-=", Tok::T_EQUAL_MINUS },
+    { "*=", Tok::T_EQUAL_STAR },
+    { "/=", Tok::T_EQUAL_SLASH }
+};
 
 // different types of general tokens used when lexing
 enum {
@@ -46,37 +77,6 @@ enum {
  */
 Lexer::Lexer(const char* filepath) : filepath(filepath) {
     load();
-
-    keywords.define("if", Tok::T_IF);
-    keywords.define("else", Tok::T_ELSE);
-    keywords.define("elif", Tok::T_ELIF);
-    keywords.define("while", Tok::T_WHILE);
-    keywords.define("continue", Tok::T_CONTINUE);
-    keywords.define("return", Tok::T_RETURN);
-    keywords.define("break", Tok::T_BREAK);
-    keywords.define("boolean", Tok::T_BOOLEAN);
-    keywords.define("float", Tok::T_FLOAT);
-    keywords.define("return", Tok::T_RETURN);
-    keywords.define("print", Tok::T_PRINT);
-    keywords.define("string", Tok::T_STRING);
-    keywords.define("func", Tok::T_FUNC);
-    keywords.define("true", Tok::T_TRUE);
-    keywords.define("false", Tok::T_FALSE);
-    keywords.define("constant", Tok::T_CONSTANT);
-    keywords.define("remit", Tok::T_REMIT);
-    keywords.define("and", Tok::T_AND);
-    keywords.define("or", Tok::T_OR);
-    keywords.define("for", Tok::T_FOR);
-
-    symbols.define("<=", Tok::T_LTE);
-    symbols.define(">=", Tok::T_GTE);
-    symbols.define("!=", Tok::T_NOT_EQUAL);
-    symbols.define("==", Tok::T_COMPARE_EQUAL);
-    symbols.define("->", Tok::T_DASH_ARROW);
-    symbols.define("+=", Tok::T_EQUAL_PLUS);
-    symbols.define("-=", Tok::T_EQUAL_MINUS);
-    symbols.define("*=", Tok::T_EQUAL_STAR);
-    symbols.define("/=", Tok::T_EQUAL_SLASH);
 }
 
 char Lexer::incr_char(int32_t off) {
@@ -128,8 +128,8 @@ void Lexer::multiline_comment_end() {
 
 void Lexer::create_sym_token() {
     for (int i = 0; i < current.size(); i++) {
-        if (symbols.found(current)) {
-            tokens.push_back(Token(symbols.get(current), current_line));
+        if (symbols.find(current) != symbols.end()) {
+            tokens.push_back(Token(symbols[current], current_line));
             return;
         }
     }
@@ -168,8 +168,8 @@ void Lexer::lex() {
         multiline_comment_beg();
         if (current_type != SINGLE_LINE_COMMENT && current_type != MULTI_LINE_COMMENT) {
             if (current_type == IDENTIFIER && !is_identifier(stream[current_index])) {
-                if (keywords.found(current)) {
-                    tokens.push_back(Token(keywords.get(current), current_line));
+                if (keywords.find(current) != keywords.end()) {
+                    tokens.push_back(Token(keywords[current], current_line));
                     reset();
                 }
                 else if (!isdigit(stream[current_index])) {
@@ -307,14 +307,7 @@ void Lexer::print_from_type(int type) {
 }
 
 void Lexer::log_keywords_symbols(int type) {
-    try {
-        std::string entry = keywords.get_key(type);
-        printf("%s", entry.c_str());
-
-        entry = symbols.get_key(type);
-        printf("%s", entry.c_str());
-    }
-    catch (SymTableError error) { }
+    
 }
 
 void Lexer::load() {

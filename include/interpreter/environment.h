@@ -36,6 +36,7 @@ struct Environment {
     
     std::map<std::string, Ast_FuncDecleration*> functions;
     std::map<std::string, Object> values; 
+
     Environment* next = nullptr;
     Environment* previous = nullptr;
 };

@@ -22,10 +22,10 @@ enum {
     AST_CONDITIONAL,
     AST_IF,
     AST_ELIF,
-    AST_CONDITIONAL_CONTROLLER,
     AST_ELSE,
     AST_FOR,
     AST_WHILE,
+    AST_RETURN,
     AST_TRANSLATION_UNIT
 };
 
@@ -77,16 +77,9 @@ enum {
     AST_SPECIFIER_CONST = 0x01
 };
 
-enum {
-    AST_CONTROLLER_NONE,
-    AST_CONTROLLER_REMIT,
-    AST_CONTROLLER_BREAK,
-};
-
 struct Ast;
 struct Ast_Expression;
 struct Ast_Scope;
-struct Ast_VarDecleration;
 
 struct Ast {
     Ast() { }
@@ -101,10 +94,10 @@ struct Ast_Expression : Ast {
 };
 
 struct Ast_FunctionCall {
-    Ast_FunctionCall(const char* ident, const   std::vector<Ast_VarDecleration*>& args) : ident(ident), args(args) { }
+    Ast_FunctionCall(const char* ident, const std::vector<Ast_Expression*>& args) : ident(ident), args(args) { }
 
     const char* ident;
-    std::vector<Ast_VarDecleration*> args;
+    std::vector<Ast_Expression*> args;
 };
 
 struct Ast_PrimaryExpression : public Ast_Expression {
@@ -244,10 +237,10 @@ struct Ast_FuncDecleration : public Ast_Decleration {
     Ast_Scope* scope = nullptr;
 };
 
-struct Ast_ConditionalController : Ast_Statement {
-    Ast_ConditionalController(int controller) : controller(controller) { type = AST_CONDITIONAL_CONTROLLER; }
+struct Ast_ReturnStatement : Ast_Statement {
+    Ast_ReturnStatement(Ast_Expression* expression) : expression(expression) { type = AST_RETURN; }
 
-    int controller = AST_CONTROLLER_NONE;
+    Ast_Expression* expression = nullptr;
 };
 
 struct Ast_TranslationUnit : public Ast {

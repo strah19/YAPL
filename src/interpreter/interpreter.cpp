@@ -47,8 +47,6 @@ void Interpreter::execute(Ast_Decleration* decleration) {
         if_statement(AST_CAST(Ast_IfStatement, decleration));
     else if (decleration->type == AST_WHILE)
         while_loop(AST_CAST(Ast_WhileLoop, decleration)); 
-    else if (decleration->type == AST_CONDITIONAL_CONTROLLER) 
-        conditional_controller(AST_CAST(Ast_ConditionalController, decleration));
     else if (decleration->type == AST_FUNC_DECLERATION) 
         function_decleration(AST_CAST(Ast_FuncDecleration, decleration));
 }
@@ -112,17 +110,16 @@ bool Interpreter::conditional_statement(Ast_ConditionalStatement* conditional) {
     return false;
 }
 
-void Interpreter::conditional_controller(Ast_ConditionalController* controller) {
-    
-}
-
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
     current_environment->var_define(decleration->ident, Object());
     if (decleration->expression) {
         Object obj;
         if (decleration->expression) {
             obj = evaluate_expression(decleration->expression);
-            OBJECT_ERRORS(decleration->expression, obj);           
+            OBJECT_ERRORS(decleration->expression, obj);   
+            if (convert_to_interpreter_type(decleration->type_value) != obj.type) {
+                throw construct_runtime_error(*decleration, OBJ_ERROR_MESSAGES[OBJ_ERROR_WRONG_TYPE]);
+            }        
         }
         else
             obj.type = convert_to_interpreter_type(decleration->type_value);
@@ -240,9 +237,46 @@ Object Interpreter::evaluate_function_call(Ast_FunctionCall* call) {
         return Object(OBJ_ERROR_UNDEFINED_FUNC);
     
     Ast_FuncDecleration* dec = current_environment->func_get(call->ident);
-    if (dec) 
-        scope(dec->scope);
+    if (dec) {
+        return execute_function(dec, call);
+    }
 
+    return Object(OBJ_ERROR_NONE);
+}
+
+Object Interpreter::execute_function(Ast_FuncDecleration* function, Ast_FunctionCall* call) {
+    Environment* previous = current_environment;
+    current_environment->next = new Environment;
+    current_environment = current_environment->next;
+    current_environment->previous = previous;
+
+    if (function->args.size() != call->args.size())
+        return Object(OBJ_ERROR_PARAMS);
+        
+    for (int i = 0; i < function->args.size(); i++) {
+        Object arg = evaluate_expression(call->args[i]);
+        OBJECT_ERRORS(call->args[i], arg);
+        current_environment->var_define(function->args[i]->ident, arg);
+    }
+
+    for (int i = 0; i < function->scope->declerations.size(); i++) {
+        if (function->scope->declerations[i]->type == AST_RETURN) {
+            auto ret = AST_CAST(Ast_ReturnStatement, function->scope->declerations[i]);
+            if (function->return_type == AST_VOID && ret->expression) return Object(OBJ_ERROR_RETURN_FULL);
+            else if (function->return_type != AST_VOID && !ret->expression) return Object(OBJ_ERROR_RETURN_IS_NULL);
+
+            if (!ret->expression)
+                return Object(OBJ_ERROR_NONE);
+            else if (ret->expression) {
+                Object obj_return = evaluate_expression(ret->expression);
+                OBJECT_ERRORS(ret->expression, obj_return);
+                return obj_return;
+            }
+        }
+        execute(function->scope->declerations[i]);
+    }
+    current_environment = current_environment->previous;
+    delete current_environment->next;
     return Object(OBJ_ERROR_NONE);
 }
 

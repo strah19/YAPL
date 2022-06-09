@@ -46,14 +46,14 @@ private:
     Ast_ExpressionStatement*  expression_statement();
     Ast_PrintStatement*       print_statement();
     Ast_Expression*           assignment();
-    Ast_VarDecleration*       var_decleration();
+    Ast_VarDecleration*       var_decleration(bool semi = true);
     Ast_FuncDecleration*      func_decleration();
     std::vector<Ast_VarDecleration*> func_args();
     Ast_Decleration*          decleration();
     Ast_Statement*            statement(); 
     Ast_Scope*                scope();
 
-    Ast_ConditionalController* controller_statement();
+    Ast_ReturnStatement*      return_statement();
     Ast_ConditionalStatement* conditional_statement();
     Ast_IfStatement*          if_statement();
     Ast_ElifStatement*        elif_statement();
@@ -65,7 +65,6 @@ private:
     void synchronize();
     int token_to_ast(Token* token);
     int token_to_ast_unary(Token* token);
-    int token_to_controller(Token* token);
     int token_to_equal(Token* token);
 private:
     std::vector<Token> tokens;

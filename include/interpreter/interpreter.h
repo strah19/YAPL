@@ -28,9 +28,10 @@ public:
 private:
     void   execute(Ast_Decleration* decleration);
     void   scope(Ast_Decleration* decleration);
+    Object execute_function(Ast_FuncDecleration* function, Ast_FunctionCall* call);
+
     Object assignment(Ast_Assignment* assign);
     void   print_statement(Ast_PrintStatement* print);
-    void   conditional_controller(Ast_ConditionalController* controller);
     void   variable_decleration(Ast_VarDecleration* decleration);
     void   function_decleration(Ast_FuncDecleration* func);
 

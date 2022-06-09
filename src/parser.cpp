@@ -159,16 +159,16 @@ std::vector<Ast_VarDecleration*> Parser::func_args() {
     if (match(Tok::T_RPAR))
         return args;
 
-    args.push_back(var_decleration());
+    args.push_back(var_decleration(false));
     while (match(Tok::T_COMMA)) {
-        //args go here
+        args.push_back(var_decleration(false));
     }
 
     consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
     return args;
 }
 
-Ast_VarDecleration* Parser::var_decleration() {
+Ast_VarDecleration* Parser::var_decleration(bool semi) {
     consume(Tok::T_IDENTIFIER, EXPECTED_ID);
     auto id = peek(-1)->identifier;
     consume(Tok::T_COLON, EXPECTED_COLON);
@@ -191,7 +191,7 @@ Ast_VarDecleration* Parser::var_decleration() {
     if (match(Tok::T_EQUAL))
         expr = expression();
     expr = (!expr) ? nullptr : expr;
-    consume(Tok::T_SEMI, EXPECTED_SEMI);
+    if (semi) consume(Tok::T_SEMI, EXPECTED_SEMI);
 
     return AST_NEW(Ast_VarDecleration, id, expr, var_type, specifiers);
 }
@@ -204,15 +204,18 @@ Ast_Statement* Parser::statement() {
     else if (match(Tok::T_ELSE)) throw parser_error(peek(), ELSE_WITHOUT_IF);
     else if (match(Tok::T_LCURLY)) return scope();
     else if (match(Tok::T_WHILE)) return while_loop();
-    else if (match(Tok::T_REMIT) || match(Tok::T_BREAK)) return controller_statement();
+    else if (match(Tok::T_RETURN)) return return_statement();
 
     return expression_statement();
 }
 
-Ast_ConditionalController* Parser::controller_statement() {
-    auto tok = tokens[current - 1];
+Ast_ReturnStatement* Parser::return_statement() {
+    if (match(Tok::T_SEMI))
+        return AST_NEW(Ast_ReturnStatement, nullptr);
+    auto expr = expression();
     consume(Tok::T_SEMI, EXPECTED_SEMI);
-    return AST_NEW(Ast_ConditionalController, token_to_controller(&tok));
+
+    return AST_NEW(Ast_ReturnStatement, expr);
 }
 
 Ast_ConditionalStatement* Parser::conditional_statement() {
@@ -443,12 +446,16 @@ Ast_Expression* Parser::primary() {
 
         prime->type_value = (peek()->type == Tok::T_LPAR) ? AST_FUNC_CALL : AST_ID;
         if (prime->type_value == AST_FUNC_CALL) {
-            std::vector<Ast_VarDecleration*> args;
+            std::vector<Ast_Expression*> args;
             consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
 
-            //Args
-
-            consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+            if (!match(Tok::T_RPAR)) {
+                args.push_back(expression());
+                while (match(Tok::T_COMMA)) {
+                    args.push_back(expression());
+                }
+                consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+            }
             prime->call = new Ast_FunctionCall(ident, args);
         }
         else {
@@ -500,14 +507,6 @@ int Parser::token_to_ast_unary(Token* token) {
     switch (token->type) {
     case Tok::T_EXCLAMATION: return AST_UNARY_NOT;
     case Tok::T_MINUS:       return AST_UNARY_MINUS;
-    }
-    return -1;
-}
-
-int Parser::token_to_controller(Token* token) {
-    switch (token->type) {
-    case Tok::T_REMIT: return AST_CONTROLLER_REMIT;
-    case Tok::T_BREAK: return AST_CONTROLLER_BREAK;
     }
     return -1;
 }

@@ -83,14 +83,17 @@ print test;
 print (test += 3);
 print test;
 
-foo : func() {
-    o : float = 2;
-    print o + test;
+sum : func(a : float, b : float) -> float {
+    return a + b;
 }
 
+</
 fighters : func() -> float {
     print "fighters";
+    return 3 + 3;
 }
 
-foo();
-fighters();
+print fighters();
+/>
+
+print sum(1, test + 1);

@@ -1,3 +1,11 @@
+***6/19/2022***
 - Created a done.txt file to store things that have been accomplished relared to YAPL.
+***6/20/2022***
 - Added the modulo operator.
+- Added << and >> in lexer plus '|'.
 - Added a number definition to be a double.
+- BUG FIX: The number definition to a double was causing errors because of name conflicts so changed it to _number.
+- Added a %= equal operator.
+- Added the ~ to the lexer.
+- Added the ~, |, &, and ^ bitwise operators. They work for both numbers and booleans.
+- Added chars to lexer.

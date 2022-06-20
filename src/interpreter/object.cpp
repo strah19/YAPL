@@ -56,7 +56,7 @@ Object Object::operator%(const Object& obj) {
     this->error |= check_operators(obj);
     if (found_errors()) return Object(this->error);
     switch (this->type) {
-    case NUMBER: return (number) ((int)this->number % (int)obj.number);
+    case NUMBER: return (_number) ((int)this->number % (int)obj.number);
     case BOOLEAN: return Object(this->boolean % obj.boolean, BOOLEAN);
     default: unknown_type_error();
     }
@@ -176,6 +176,70 @@ Object Object::operator||(const Object& obj) {
 Object Object::operator!() {
     switch (this->type) {
     case BOOLEAN: return Object(!this->boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator&(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (_number) ((int)this->number & (int)obj.number);
+    case BOOLEAN: return Object(this->boolean & obj.boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator|(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (_number) ((int)this->number | (int)obj.number);
+    case BOOLEAN: return Object(this->boolean | obj.boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator^(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (_number) ((int)this->number ^ (int)obj.number);
+    case BOOLEAN: return Object(this->boolean ^ obj.boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator~() {
+    switch (this->type) {
+    case NUMBER: return (_number) (~(int)(this->number));
+    case BOOLEAN: return Object(~this->boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator<<(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (_number) ((int)this->number << (int)obj.number);
+    case BOOLEAN: return Object(this->boolean << obj.boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
+Object Object::operator>>(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (_number) ((int)this->number >> (int)obj.number);
+    case BOOLEAN: return Object(this->boolean >> obj.boolean, BOOLEAN);
     default: unknown_type_error();
     }
     return *this;

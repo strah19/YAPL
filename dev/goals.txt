@@ -5,7 +5,7 @@
 *           Format: start date : 'goal' : finish date            *
 ******************************************************************
 
-6/19/2022 : 'Added bit operators (&, |, ~, ^)' : n/a
+6/19/2022 : 'Added bit operators (&, |, ~, ^)' : 6/20/2022
 6/19/2022 : 'Finish for loops' : n/a
 6/19/2022 : 'Added an input function, similiar to print but gives access to stdin' : n/a
 6/19/2022 : 'Add new type of char' : n/a

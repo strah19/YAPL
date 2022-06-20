@@ -65,6 +65,7 @@ struct Object {
     Object operator/(const Object& obj);
     Object operator%(const Object& obj);
     Object operator-();
+    Object operator~();
     Object operator==(const Object& obj);
     Object operator!=(const Object& obj);
     Object operator>(const Object& obj);
@@ -73,6 +74,11 @@ struct Object {
     Object operator<=(const Object& obj);
     Object operator&&(const Object& obj);
     Object operator||(const Object& obj);
+    Object operator&(const Object& obj);
+    Object operator|(const Object& obj);
+    Object operator^(const Object& obj);
+    Object operator<<(const Object& obj);
+    Object operator>>(const Object& obj);
     Object operator!();
 
     static int check_divide_by_zero(const Object& obj);

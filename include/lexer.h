@@ -16,6 +16,8 @@ namespace Tok {
         T_EQUAL = '=',
         T_CARET = '^',
         T_AMBERSAND = '&',
+        T_NOT = '~',
+        T_LINE = '|',
         
         T_LPAR = '(',
         T_RPAR = ')',
@@ -31,7 +33,6 @@ namespace Tok {
         T_RARROW = '>',
         T_COMMA = ',', 
         T_QUOTE = '"',
-        T_LINE = '|',
 
         T_EOF = 255,
 
@@ -53,13 +54,16 @@ namespace Tok {
         T_EQUAL_MINUS,
         T_EQUAL_STAR,
         T_EQUAL_SLASH,
+        T_EQUAL_MOD,
         T_FALSE,
         T_REMIT,
         T_TRUE,
+        T_CHAR_CONST,
         T_FUNC,
         
         T_FLOAT,
         T_BOOLEAN,
+        T_CHAR,
         T_STRING,
         T_STRING_CONST,
         T_CONSTANT,

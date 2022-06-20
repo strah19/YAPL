@@ -36,8 +36,9 @@ private:
     Ast_Expression* expression();
     Ast_Expression* logical();
     Ast_Expression* equality();
+    Ast_Expression* bitwise();
     Ast_Expression* comparison();
-
+    Ast_Expression* shifts();
     Ast_Expression* term();
     Ast_Expression* factor();
     Ast_Expression* unary();

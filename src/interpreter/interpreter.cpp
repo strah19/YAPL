@@ -179,6 +179,7 @@ Object Interpreter::evaluate_equal(Ast_Assignment* assign) {
     case AST_EQUAL_MINUS:    return obj - evaluate_expression(assign->expression); 
     case AST_EQUAL_MULTIPLY: return obj * evaluate_expression(assign->expression); 
     case AST_EQUAL_DIVIDE:   return obj / evaluate_expression(assign->expression); 
+    case AST_EQUAL_MOD:      return obj % evaluate_expression(assign->expression); 
     default:                 return obj;
     }
 }
@@ -205,9 +206,10 @@ Object Interpreter::evaluate_expression(Ast_Expression* expression) {
 Object Interpreter::evaluate_unary(Ast_UnaryExpression* unary) {
     Object value = evaluate_expression(unary->next);
     switch (unary->op) {
-    case AST_UNARY_MINUS: return -value;
-    case AST_UNARY_NOT:   return !value;
-    default:              return value;
+    case AST_UNARY_MINUS:   return -value;
+    case AST_UNARY_NOT:     return !value;
+    case AST_UNARY_BIT_NOT: return ~value;
+    default:                return value;
     }
     return value;
 }
@@ -299,6 +301,11 @@ Object Interpreter::evaluate_binary(Ast_BinaryExpression* binary) {
     case AST_OPERATOR_AND:                   return left && right;
     case AST_OPERATOR_OR:                    return left || right;
     case AST_OPERATOR_MODULO:                return left % right;
+    case AST_OPERATOR_BIT_AND:               return left & right;
+    case AST_OPERATOR_BIT_OR:                return left | right;
+    case AST_OPERATOR_BIT_XOR:               return left ^ right;
+    case AST_OPERATOR_BIT_LEFT:              return left << right;
+    case AST_OPERATOR_BIT_RIGHT:             return left >> right;
     default: return Object(OBJ_ERROR_UNKNOWN_OPERATOR);
     }  
 }

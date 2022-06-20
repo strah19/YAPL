@@ -45,7 +45,8 @@ static std::map<std::string, int> keywords = {
     { "remit", Tok::T_REMIT },
     { "and", Tok::T_AND },
     { "or", Tok::T_OR },
-    { "for", Tok::T_FOR }
+    { "for", Tok::T_FOR },
+    { "char", Tok::T_CHAR }
 };
 
 static std::map<std::string, int> symbols = {
@@ -59,7 +60,8 @@ static std::map<std::string, int> symbols = {
     { "*=", Tok::T_EQUAL_STAR },
     { "/=", Tok::T_EQUAL_SLASH },
     { "<<", Tok::T_BIT_LEFT },
-    { ">>", Tok::T_BIT_RIGHT }
+    { ">>", Tok::T_BIT_RIGHT },
+    { "%=", Tok::T_EQUAL_MOD }
 };
 
 // different types of general tokens used when lexing
@@ -216,11 +218,21 @@ void Lexer::lex() {
             if (!is_spec_char(stream[current_index]) || current_type == STRING) {
                 current.push_back(stream[current_index]);
                 if (current.size() == 1) {
-                    current_type = get_type(stream[current_index]);
+                    if (current[0] == '\'') {
+                        move();
+                        tokens.push_back(Token(Tok::T_CHAR_CONST, current_line));
+                        tokens.back().char_const = stream[current_index];
 
-                    if (current_type == SYMBOL) {
-                        if (stream[current_index] == '"') 
-                            current_type = STRING;
+                        reset();
+                        move();
+                    }
+                    else {
+                        current_type = get_type(stream[current_index]);
+
+                        if (current_type == SYMBOL) {
+                            if (stream[current_index] == '"') 
+                                current_type = STRING;
+                        }
                     }
                 }
             }      
@@ -271,6 +283,10 @@ void Lexer::print_token(Token& token) {
     }
     case Tok::T_STRING_CONST: {
         printf("%s", token.string);
+        break;
+    }
+    case Tok::T_CHAR_CONST: {
+        printf("%c", token.char_const);
         break;
     }
     case Tok::T_FLOAT_CONST: {

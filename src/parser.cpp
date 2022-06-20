@@ -42,7 +42,8 @@
 static std::map<int, int> TYPES  = {
     { Tok::T_FLOAT,   AST_FLOAT   },
     { Tok::T_STRING,  AST_STRING  },
-    { Tok::T_BOOLEAN, AST_BOOLEAN }
+    { Tok::T_BOOLEAN, AST_BOOLEAN },
+    { Tok::T_CHAR,    AST_CHAR }
 };
 
 static std::map<int, int> SPECIFIERS = {
@@ -336,7 +337,8 @@ Ast_Expression* Parser::expression() {
 Ast_Expression* Parser::assignment() {
     auto expr = logical();
 
-    if (match(Tok::T_EQUAL) || match(Tok::T_EQUAL_PLUS) || match(Tok::T_EQUAL_MINUS) || match(Tok::T_EQUAL_STAR) || match(Tok::T_EQUAL_SLASH)) {
+    if (match(Tok::T_EQUAL) || match(Tok::T_EQUAL_PLUS) || match(Tok::T_EQUAL_MINUS) || 
+        match(Tok::T_EQUAL_STAR) || match(Tok::T_EQUAL_SLASH) || match(Tok::T_EQUAL_MOD)) {
         Token* equal = peek(-1);
         auto val = assignment();
 
@@ -350,14 +352,26 @@ Ast_Expression* Parser::assignment() {
 }
 
 Ast_Expression* Parser::logical() {
-    auto expr = equality();
+    auto expr = bitwise();
 
     while (match(Tok::T_AND) || match(Tok::T_OR)) {
         auto tok = tokens[current - 1];
-        auto right = equality();
+        auto right = bitwise();
         expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);      
     }
 
+    return expr;
+}
+
+Ast_Expression* Parser::bitwise() {
+    auto expr = equality();
+    
+    while (match(Tok::T_CARET) || match(Tok::T_LINE) || match(Tok::T_AMBERSAND)) {
+        auto tok = tokens[current - 1];
+        auto right = equality();
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
+    }
+    
     return expr;
 }
 
@@ -374,9 +388,21 @@ Ast_Expression* Parser::equality() {
 }
 
 Ast_Expression* Parser::comparison() {
-    auto expr = term();
+    auto expr = shifts();
 
     while (match(Tok::T_LTE) || match(Tok::T_GTE) || match(Tok::T_LARROW) || match(Tok::T_RARROW)) {
+        auto tok = tokens[current - 1];
+        auto right = shifts();
+        expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
+    }
+
+    return expr;
+}
+
+Ast_Expression* Parser::shifts() {
+    auto expr = term();
+
+    while (match(Tok::T_BIT_LEFT) || match(Tok::T_BIT_RIGHT)) {
         auto tok = tokens[current - 1];
         auto right = term();
         expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
@@ -410,7 +436,7 @@ Ast_Expression* Parser::factor() {
 }
 
 Ast_Expression* Parser::unary() {
-    if (match(Tok::T_MINUS) || match(Tok::T_EXCLAMATION)) {
+    if (match(Tok::T_MINUS) || match(Tok::T_EXCLAMATION) || match(Tok::T_NOT)) {
         auto tok = tokens[current - 1];
         Ast_Expression* right = unary();
         return AST_NEW(Ast_UnaryExpression, right, token_to_ast_unary(&tok));
@@ -500,6 +526,11 @@ int Parser::token_to_ast(Token* token) {
     case Tok::T_AND:           return AST_OPERATOR_AND;
     case Tok::T_OR:            return AST_OPERATOR_OR;
     case Tok::T_PERCENT:       return AST_OPERATOR_MODULO;
+    case Tok::T_AMBERSAND:     return AST_OPERATOR_BIT_AND;
+    case Tok::T_LINE:          return AST_OPERATOR_BIT_OR;
+    case Tok::T_CARET:         return AST_OPERATOR_BIT_XOR;
+    case Tok::T_BIT_LEFT:      return AST_OPERATOR_BIT_LEFT;
+    case Tok::T_BIT_RIGHT:     return AST_OPERATOR_BIT_RIGHT;
     }
     return -1;
 }
@@ -508,6 +539,7 @@ int Parser::token_to_ast_unary(Token* token) {
     switch (token->type) {
     case Tok::T_EXCLAMATION: return AST_UNARY_NOT;
     case Tok::T_MINUS:       return AST_UNARY_MINUS;
+    case Tok::T_NOT:         return AST_UNARY_BIT_NOT;
     }
     return -1;
 }
@@ -519,6 +551,7 @@ int Parser::token_to_equal(Token* token) {
     case Tok::T_EQUAL_MINUS: return AST_EQUAL_MINUS;
     case Tok::T_EQUAL_STAR:  return AST_EQUAL_MULTIPLY;
     case Tok::T_EQUAL_SLASH: return AST_EQUAL_DIVIDE;
+    case Tok::T_EQUAL_MOD:   return AST_EQUAL_MOD;
     }
     return -1;
 }

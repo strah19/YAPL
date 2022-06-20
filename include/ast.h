@@ -6,7 +6,7 @@
 
 #include <vector>
 
-using number = double;
+using _number = double;
 
 enum {
     AST_EXPRESSION,
@@ -45,13 +45,18 @@ enum {
     AST_OPERATOR_GT,
     AST_OPERATOR_AND,
     AST_OPERATOR_OR,
-    AST_OPERATOR_POWER,
+    AST_OPERATOR_BIT_XOR,
+    AST_OPERATOR_BIT_OR,
+    AST_OPERATOR_BIT_AND,
+    AST_OPERATOR_BIT_LEFT,
+    AST_OPERATOR_BIT_RIGHT,
     AST_OPERATOR_NONE
 };
 
 enum {
     AST_UNARY_MINUS,
     AST_UNARY_NOT,
+    AST_UNARY_BIT_NOT,
     AST_UNARY_NONE
 };
 
@@ -60,7 +65,8 @@ enum {
     AST_EQUAL_PLUS,
     AST_EQUAL_MINUS,
     AST_EQUAL_MULTIPLY,
-    AST_EQUAL_DIVIDE
+    AST_EQUAL_DIVIDE,
+    AST_EQUAL_MOD
 };
 
 enum {
@@ -68,6 +74,7 @@ enum {
     AST_BOOLEAN,
     AST_STRING,
     AST_NESTED,
+    AST_CHAR,
     AST_ID,
     AST_FUNC_CALL,
     AST_VOID,
@@ -105,11 +112,11 @@ struct Ast_FunctionCall {
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
     Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
-    Ast_PrimaryExpression(number float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
+    Ast_PrimaryExpression(_number float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
     int type_value = AST_TYPE_NONE;
 
     union {
-        number float_const;
+        _number float_const;
         const char* ident;
         const char* string;
         bool boolean;

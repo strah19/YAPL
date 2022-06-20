@@ -52,6 +52,17 @@ Object Object::operator*(const Object& obj) {
     return *this;
 }
 
+Object Object::operator%(const Object& obj) {
+    this->error |= check_operators(obj);
+    if (found_errors()) return Object(this->error);
+    switch (this->type) {
+    case NUMBER: return (number) ((int)this->number % (int)obj.number);
+    case BOOLEAN: return Object(this->boolean % obj.boolean, BOOLEAN);
+    default: unknown_type_error();
+    }
+    return *this;
+}
+
 Object Object::operator/(const Object& obj) {
     this->error |= check_operators(obj);
     this->error |= Object::check_divide_by_zero(obj);

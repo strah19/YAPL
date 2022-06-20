@@ -6,6 +6,8 @@
 
 #include <vector>
 
+using number = double;
+
 enum {
     AST_EXPRESSION,
     AST_UNARY,
@@ -103,11 +105,11 @@ struct Ast_FunctionCall {
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
     Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
-    Ast_PrimaryExpression(double float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
+    Ast_PrimaryExpression(number float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
     int type_value = AST_TYPE_NONE;
 
     union {
-        double float_const;
+        number float_const;
         const char* ident;
         const char* string;
         bool boolean;

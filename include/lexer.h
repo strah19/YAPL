@@ -31,6 +31,7 @@ namespace Tok {
         T_RARROW = '>',
         T_COMMA = ',', 
         T_QUOTE = '"',
+        T_LINE = '|',
 
         T_EOF = 255,
 
@@ -62,6 +63,8 @@ namespace Tok {
         T_STRING,
         T_STRING_CONST,
         T_CONSTANT,
+        T_BIT_LEFT,
+        T_BIT_RIGHT,
 
         T_IDENTIFIER,
         T_FLOAT_CONST,

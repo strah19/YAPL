@@ -1,0 +1,3 @@
+- Created a done.txt file to store things that have been accomplished relared to YAPL.
+- Added the modulo operator.
+- Added a number definition to be a double.

@@ -57,7 +57,9 @@ static std::map<std::string, int> symbols = {
     { "+=", Tok::T_EQUAL_PLUS },
     { "-=", Tok::T_EQUAL_MINUS },
     { "*=", Tok::T_EQUAL_STAR },
-    { "/=", Tok::T_EQUAL_SLASH }
+    { "/=", Tok::T_EQUAL_SLASH },
+    { "<<", Tok::T_BIT_LEFT },
+    { ">>", Tok::T_BIT_RIGHT }
 };
 
 // different types of general tokens used when lexing

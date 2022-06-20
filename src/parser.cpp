@@ -400,7 +400,7 @@ Ast_Expression* Parser::term() {
 Ast_Expression* Parser::factor() {
     auto expr = unary();
     
-    while (match(Tok::T_SLASH) || match(Tok::T_STAR)) {
+    while (match(Tok::T_SLASH) || match(Tok::T_STAR) || match(Tok::T_PERCENT)) {
         auto tok = tokens[current - 1];
         auto right = unary();
         expr = AST_NEW(Ast_BinaryExpression, expr, token_to_ast(&tok), right);
@@ -499,6 +499,7 @@ int Parser::token_to_ast(Token* token) {
     case Tok::T_SLASH:         return AST_OPERATOR_DIVISION;
     case Tok::T_AND:           return AST_OPERATOR_AND;
     case Tok::T_OR:            return AST_OPERATOR_OR;
+    case Tok::T_PERCENT:       return AST_OPERATOR_MODULO;
     }
     return -1;
 }

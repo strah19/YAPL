@@ -63,6 +63,7 @@ struct Object {
     Object operator-(const Object& obj);
     Object operator*(const Object& obj);
     Object operator/(const Object& obj);
+    Object operator%(const Object& obj);
     Object operator-();
     Object operator==(const Object& obj);
     Object operator!=(const Object& obj);

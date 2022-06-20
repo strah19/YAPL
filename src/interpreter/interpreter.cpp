@@ -298,6 +298,7 @@ Object Interpreter::evaluate_binary(Ast_BinaryExpression* binary) {
     case AST_OPERATOR_LTE:                   return left <= right;
     case AST_OPERATOR_AND:                   return left && right;
     case AST_OPERATOR_OR:                    return left || right;
+    case AST_OPERATOR_MODULO:                return left % right;
     default: return Object(OBJ_ERROR_UNKNOWN_OPERATOR);
     }  
 }

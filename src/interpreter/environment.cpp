@@ -24,6 +24,9 @@ void Environment::var_define(const char* name, Object object) {
 
 int Environment::var_update(const char* name, Object object) {
     if (var_found(name)) {
+        Object o = values[name];
+        if (o.type != object.type)
+            return EN_ERROR_WRONG_TYPE_ASSIGN;
         values[name] = object; 
         return EN_ERROR_NONE;
     }

@@ -22,7 +22,8 @@ enum {
     OBJ_ERROR_RETURN_IS_NULL,
     OBJ_ERROR_RETURN_FULL,
     OBJ_ERROR_PARAMS,
-    OBJ_ERROR_WRONG_TYPE
+    OBJ_ERROR_WRONG_TYPE,
+    OBJ_ERROR_WRONG_RET_TYPE
 };
 
 static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
@@ -37,7 +38,8 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
     { OBJ_ERROR_RETURN_IS_NULL, "Function was returned with nothing when it has a return type" },
     { OBJ_ERROR_RETURN_FULL, "Function was returned with expression when return type is void" },
     { OBJ_ERROR_PARAMS, "Function arguments do not match the paramters" },
-    { OBJ_ERROR_WRONG_TYPE, "Types do not match" }
+    { OBJ_ERROR_WRONG_TYPE, "Types do not match" },
+    { OBJ_ERROR_WRONG_RET_TYPE, "Types do not match in return expression" }
 };
 
 struct Object {

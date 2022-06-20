@@ -9,12 +9,14 @@ enum {
     EN_ERROR_NONE,
     EN_ERROR_UNDEFINED_VAR,
     EN_ERROR_UNDEFINED_FUNC,
+    EN_ERROR_WRONG_TYPE_ASSIGN,
 };
 
 static std::map<int, const char*> EN_ERROR_MESSAGES {
     { EN_ERROR_NONE, "No error found in object" },
     { EN_ERROR_UNDEFINED_VAR, "Undefined variable" },
-    { EN_ERROR_UNDEFINED_FUNC, "Undefined function" }
+    { EN_ERROR_UNDEFINED_FUNC, "Undefined function" },
+    { EN_ERROR_WRONG_TYPE_ASSIGN, "Types do not match in assignment" }
 };
 
 struct Environment {

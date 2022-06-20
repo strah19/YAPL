@@ -97,3 +97,6 @@ print fighters();
 />
 
 print sum(1, test + 1);
+
+j : float = 3;
+print j;

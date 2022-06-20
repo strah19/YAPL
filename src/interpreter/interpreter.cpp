@@ -224,7 +224,7 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
         return obj;
     }   
     case AST_FUNC_CALL: {
-        Object obj =  evaluate_function_call(primary->call);
+        Object obj = evaluate_function_call(primary->call);
         OBJECT_ERRORS(primary, obj);
         return obj;
     }
@@ -237,9 +237,8 @@ Object Interpreter::evaluate_function_call(Ast_FunctionCall* call) {
         return Object(OBJ_ERROR_UNDEFINED_FUNC);
     
     Ast_FuncDecleration* dec = current_environment->func_get(call->ident);
-    if (dec) {
+    if (dec) 
         return execute_function(dec, call);
-    }
 
     return Object(OBJ_ERROR_NONE);
 }
@@ -269,6 +268,8 @@ Object Interpreter::execute_function(Ast_FuncDecleration* function, Ast_Function
                 return Object(OBJ_ERROR_NONE);
             else if (ret->expression) {
                 Object obj_return = evaluate_expression(ret->expression);
+                if (obj_return.type != function->return_type) 
+                    return Object(OBJ_ERROR_WRONG_RET_TYPE);
                 OBJECT_ERRORS(ret->expression, obj_return);
                 return obj_return;
             }

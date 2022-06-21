@@ -466,6 +466,12 @@ Ast_Expression* Parser::primary() {
         match(Tok::T_FLOAT_CONST);
         break;
     }
+    case Tok::T_CHAR_CONST: {
+        prime->char_const = peek()->char_const;
+        prime->type_value = AST_CHAR;
+        match(Tok::T_CHAR_CONST);
+        break;
+    }
     case Tok::T_IDENTIFIER: {
         const char* ident = peek()->identifier;
         match(Tok::T_IDENTIFIER);

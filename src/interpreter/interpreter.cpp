@@ -144,6 +144,9 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
         case STRING:
             printf("%s", obj.str);
             break;
+        case CHAR:
+            printf("%c", obj.char_const);
+            break;
         default:
             printf("(null)");
         }
@@ -219,7 +222,8 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
     case AST_NESTED:  return evaluate_expression(primary->nested);
     case AST_FLOAT:   return primary->float_const;
     case AST_STRING:  return primary->string;
-    case AST_BOOLEAN: return Object(primary->boolean, BOOLEAN);
+    case AST_CHAR:    return Object::init_char(primary->char_const);
+    case AST_BOOLEAN: return Object::init_bool(primary->boolean);
     case AST_ID: {
         Object obj  = current_environment->var_get(primary->ident);
         OBJECT_ERRORS(primary, obj);
@@ -323,6 +327,7 @@ int Interpreter::convert_to_interpreter_type(int ast_type) {
     case AST_FLOAT:   return NUMBER;
     case AST_STRING:  return STRING;
     case AST_BOOLEAN: return BOOLEAN;
+    case AST_CHAR:    return CHAR;
     }
     return NONE;
 }

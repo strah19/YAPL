@@ -7,6 +7,7 @@ enum {
     NUMBER,
     STRING,
     BOOLEAN,
+    CHAR,
     NONE,
 };
 
@@ -45,13 +46,30 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
 struct Object {
     Object(double number) : number(number), type(NUMBER), error(OBJ_ERROR_NONE) { }
     Object(const char* str) : str(str), type(STRING), error(OBJ_ERROR_NONE) { }
-    Object(bool boolean, int type) : boolean(boolean), type(type), error(OBJ_ERROR_NONE) { }
+
+    static Object init_bool(bool boolean) {
+        Object obj;
+        obj.boolean = boolean;
+        obj.type = BOOLEAN;
+        obj.error = OBJ_ERROR_NONE; 
+        return obj;    
+    }
+
+    static Object init_char(char char_const) {
+        Object obj;
+        obj.char_const = char_const;
+        obj.type = CHAR;
+        obj.error = OBJ_ERROR_NONE; 
+        return obj;
+    }
+
     Object(int error) : error(error) { }
     Object() { }
 
     union {
         double number;
         const char* str;
+        char char_const;
         bool boolean;
     };
     int type = NONE;
@@ -82,7 +100,7 @@ struct Object {
     Object operator!();
 
     static int check_divide_by_zero(const Object& obj);
-    int check_operators(const Object& obj);
+    int check_operators(Object& obj);
     bool found_errors();
     void unknown_type_error();
     void cannot_negate_type_error();

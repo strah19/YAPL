@@ -113,12 +113,15 @@ struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
     Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
     Ast_PrimaryExpression(_number float_const) : float_const(float_const), type_value(AST_FLOAT) { type = AST_PRIMARY; }
+    Ast_PrimaryExpression(char char_const) : char_const(char_const), type_value(AST_CHAR) { type = AST_PRIMARY; }
+    
     int type_value = AST_TYPE_NONE;
 
     union {
         _number float_const;
         const char* ident;
         const char* string;
+        char char_const;
         bool boolean;
         
         Ast_FunctionCall* call;

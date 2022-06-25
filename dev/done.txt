@@ -11,3 +11,5 @@
 - Added chars to lexer.
 ***6/21/2022***
 - Started to get chars to work like adding and printing them.
+***6/25/2022***
+- Added a cast keyword.

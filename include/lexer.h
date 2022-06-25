@@ -59,6 +59,7 @@ namespace Tok {
         T_REMIT,
         T_TRUE,
         T_CHAR_CONST,
+        T_CAST,
         T_FUNC,
         
         T_FLOAT,

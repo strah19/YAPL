@@ -112,5 +112,7 @@ l : boolean = true;
 
 print p & l;
 
-character : char = 'c';
-print character;
+//character : char = 'a';
+//print character;
+
+print cast<char>('a');

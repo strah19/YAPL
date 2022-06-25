@@ -234,6 +234,16 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
         OBJECT_ERRORS(primary, obj);
         return obj;
     }
+    case AST_CAST: {
+        Object obj = evaluate_expression(primary->cast.expression);
+        OBJECT_ERRORS(primary, obj);
+        Object casting_obj;
+        casting_obj.type = convert_to_interpreter_type(primary->cast.cast_type);
+        int errors = obj.check_operators(casting_obj);
+        OBJECT_ERRORS(primary, Object(errors));
+        return obj;
+        break;
+    }
     default: return Object(OBJ_ERROR_UNKNOWN_TYPE);
     }
 }

@@ -76,6 +76,7 @@ enum {
     AST_NESTED,
     AST_CHAR,
     AST_ID,
+    AST_CAST,
     AST_FUNC_CALL,
     AST_VOID,
     AST_TYPE_NONE
@@ -109,6 +110,13 @@ struct Ast_FunctionCall {
     std::vector<Ast_Expression*> args;
 };
 
+struct Ast_Cast {
+    Ast_Cast(Ast_Expression* expression, int cast_type) : cast_type(cast_type), expression(expression) { }
+
+    Ast_Expression* expression = nullptr;
+    int cast_type = AST_TYPE_NONE;
+};
+
 struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression() { type = AST_PRIMARY; }
     Ast_PrimaryExpression(const char* ident) : ident(ident), type_value(AST_ID) { type = AST_PRIMARY; }
@@ -126,6 +134,7 @@ struct Ast_PrimaryExpression : public Ast_Expression {
         
         Ast_FunctionCall* call;
         Ast_Expression* nested;
+        Ast_Cast cast;
     };
 };
 

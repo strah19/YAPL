@@ -27,8 +27,10 @@
 #define EXPECTED_LEFT_CURLY "Expected '{' at the end of scope"
 #define EXPECTED_RIGHT_CURLY "Expected '}' at the end of scope"
 #define EXPECTED_FUNC "Expected 'func' for a function decleration"
-#define EXPECTED_LEFT_PAR "Expected '(' for function arguments"
-#define EXPECTED_RIGHT_PAR "Expected ')' for function arguments"
+#define EXPECTED_LEFT_PAR "Expected '('"
+#define EXPECTED_RIGHT_PAR "Expected ')'"
+#define EXPECTED_LARROW "Expected '<'"
+#define EXPECTED_RARROW "Expected '>"
 
 #define UNKNOWN_TYPE "Unknown type found in variable decleration"
 #define ELIF_WITHOUT_IF "Elif without an if statement found"
@@ -180,13 +182,7 @@ Ast_VarDecleration* Parser::var_decleration(bool semi) {
         match(peek()->type);
     }
 
-    int var_type = AST_TYPE_NONE;
-    if (TYPES.find(peek()->type) != TYPES.end()) {
-        var_type = TYPES[peek()->type];
-        match(peek()->type);
-    }
-    else
-        throw parser_error(peek(), UNKNOWN_TYPE);
+    int var_type = type();
 
     Ast_Expression* expr = nullptr;
     if (match(Tok::T_EQUAL))
@@ -496,6 +492,21 @@ Ast_Expression* Parser::primary() {
         
         break;
     }
+    case Tok::T_CAST: {
+        match(Tok::T_CAST);
+        consume(Tok::T_LARROW, EXPECTED_LARROW);
+        int t = type();
+        consume(Tok::T_RARROW, EXPECTED_RARROW);
+        consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
+        auto expr = expression();
+        consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+
+        prime->cast.cast_type = t;
+        prime->cast.expression = expr;
+        prime->type_value = AST_CAST;
+
+        break;
+    }
     case Tok::T_LPAR: {
         match(Tok::T_LPAR);
         auto expr = expression();
@@ -560,4 +571,15 @@ int Parser::token_to_equal(Token* token) {
     case Tok::T_EQUAL_MOD:   return AST_EQUAL_MOD;
     }
     return -1;
+}
+
+int Parser::type() {
+    int var_type = AST_TYPE_NONE;
+    if (TYPES.find(peek()->type) != TYPES.end()) {
+        var_type = TYPES[peek()->type];
+        match(peek()->type);
+        return var_type;
+    }
+    else
+        throw parser_error(peek(), UNKNOWN_TYPE);
 }

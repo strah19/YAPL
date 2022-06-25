@@ -46,7 +46,8 @@ static std::map<std::string, int> keywords = {
     { "and", Tok::T_AND },
     { "or", Tok::T_OR },
     { "for", Tok::T_FOR },
-    { "char", Tok::T_CHAR }
+    { "char", Tok::T_CHAR },
+    { "cast", Tok::T_CAST }
 };
 
 static std::map<std::string, int> symbols = {

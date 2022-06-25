@@ -9,4 +9,5 @@
 - Added the ~ to the lexer.
 - Added the ~, |, &, and ^ bitwise operators. They work for both numbers and booleans.
 - Added chars to lexer.
+***6/21/2022***
 - Started to get chars to work like adding and printing them.

@@ -114,5 +114,3 @@ print p & l;
 
 character : char = 'c';
 print character;
-
-print character + j;

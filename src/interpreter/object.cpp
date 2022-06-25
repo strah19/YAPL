@@ -37,8 +37,9 @@ Object Object::operator-(const Object& obj) {
     this->error |= check_operators(o);
     if (found_errors()) return Object(this->error);
     switch (this->type) {
-    case NUMBER: return this->number - o.number;
+    case NUMBER:  return this->number - o.number;
     case BOOLEAN: return Object::init_bool(this->boolean - o.boolean);
+    case CHAR:    return Object::init_char(this->char_const - o.char_const);
     default: unknown_type_error();
     }
     return *this;
@@ -49,8 +50,9 @@ Object Object::operator*(const Object& obj) {
     this->error |= check_operators(o);
     if (found_errors()) return Object(this->error);
     switch (this->type) {
-    case NUMBER: return this->number * o.number;
+    case NUMBER:  return this->number * o.number;
     case BOOLEAN: return Object::init_bool(this->boolean * o.boolean);
+    case CHAR:    return Object::init_char(this->char_const * o.char_const);
     default: unknown_type_error();
     }
     return *this;
@@ -61,8 +63,9 @@ Object Object::operator%(const Object& obj) {
     this->error |= check_operators(o);
     if (found_errors()) return Object(this->error);
     switch (this->type) {
-    case NUMBER: return (_number) ((int)this->number % (int)o.number);
+    case NUMBER:  return (_number) ((int)this->number % (int)o.number);
     case BOOLEAN: return Object::init_bool(this->boolean % o.boolean);
+    case CHAR:    return Object::init_char(this->char_const % o.char_const);
     default: unknown_type_error();
     }
     return *this;
@@ -74,8 +77,9 @@ Object Object::operator/(const Object& obj) {
     this->error |= Object::check_divide_by_zero(o);
     if (found_errors()) return Object(this->error);
     switch (this->type) {
-    case NUMBER: return this->number / o.number;
+    case NUMBER:  return this->number / o.number;
     case BOOLEAN: return Object::init_bool(this->boolean / o.boolean);
+    case CHAR:    return Object::init_char(this->char_const / o.char_const);
     default: unknown_type_error();
     }
     return *this;
@@ -267,6 +271,7 @@ Object Object::operator>>(const Object& obj) {
 int Object::check_divide_by_zero(const Object& obj) {
     if (obj.type == NUMBER && obj.number != 0) return OBJ_ERROR_NONE;
     if (obj.type == BOOLEAN && obj.boolean != 0) return OBJ_ERROR_NONE;
+    if (obj.type == CHAR && obj.char_const != 0) return OBJ_ERROR_NONE;
     return OBJ_ERROR_DIVIDE_ZERO;
 }
 

@@ -212,7 +212,7 @@ void Lexer::lex() {
                 reset();
                 move();
             }
-            else if (current_type == SYMBOL && get_type(stream[current_index]) != SYMBOL) {
+            else if (current_type == SYMBOL && (get_type(stream[current_index]) != SYMBOL || stream[current_index] == '\'')) {
                 create_sym_token();
                 reset();
             }

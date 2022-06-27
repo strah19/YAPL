@@ -13,3 +13,4 @@
 - Started to get chars to work like adding and printing them.
 ***6/25/2022***
 - Added a cast keyword.
+- Casts work with chars and numbers.

@@ -290,6 +290,27 @@ int Object::check_operators(Object& obj) {
     return OBJ_ERROR_MUST_BE_NUMBERS;
 }
 
+int Object::convert(Object& obj) {
+    if (this->type == obj.type) return OBJ_ERROR_NONE;
+
+    if (obj.type == NUMBER) {
+        if (this->type == CHAR) {
+            this->type = NUMBER;
+            this->number = (_number) ((int) this->char_const);
+            return OBJ_ERROR_NONE;
+        }
+    }
+    else if (obj.type == CHAR) {
+        if (this->type == NUMBER) {
+            this->type = CHAR;
+            this->char_const = (char) ((int) this->number);
+            return OBJ_ERROR_NONE;
+        }
+    }
+
+    return OBJ_ERROR_CONVERT;
+}
+
 bool Object::found_errors() {
     return (this->error != OBJ_ERROR_NONE);
 }

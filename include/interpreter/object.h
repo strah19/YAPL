@@ -24,7 +24,8 @@ enum {
     OBJ_ERROR_RETURN_FULL,
     OBJ_ERROR_PARAMS,
     OBJ_ERROR_WRONG_TYPE,
-    OBJ_ERROR_WRONG_RET_TYPE
+    OBJ_ERROR_WRONG_RET_TYPE,
+    OBJ_ERROR_CONVERT
 };
 
 static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
@@ -40,7 +41,8 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
     { OBJ_ERROR_RETURN_FULL, "Function was returned with expression when return type is void" },
     { OBJ_ERROR_PARAMS, "Function arguments do not match the paramters" },
     { OBJ_ERROR_WRONG_TYPE, "Types do not match" },
-    { OBJ_ERROR_WRONG_RET_TYPE, "Types do not match in return expression" }
+    { OBJ_ERROR_WRONG_RET_TYPE, "Types do not match in return expression" },
+    { OBJ_ERROR_CONVERT, "Unable to convert between types" }
 };
 
 struct Object {
@@ -101,6 +103,7 @@ struct Object {
 
     static int check_divide_by_zero(const Object& obj);
     int check_operators(Object& obj);
+    int convert(Object& obj);
     bool found_errors();
     void unknown_type_error();
     void cannot_negate_type_error();

@@ -115,4 +115,4 @@ print p & l;
 //character : char = 'a';
 //print character;
 
-print cast<char>('a');
+print cast<char>(66);

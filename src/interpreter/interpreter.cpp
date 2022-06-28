@@ -135,8 +135,11 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
         Object obj = evaluate_expression(print->expressions[i]);
         OBJECT_ERRORS(print, obj);             
         switch (obj.type) {
-        case NUMBER:
-            printf("%f", obj.number);
+        case FLOAT:
+            printf("%f", obj.float_const);
+            break;
+        case INT:
+            printf("%d", obj.int_const);
             break;
         case BOOLEAN:
             printf("%d", obj.boolean);
@@ -220,8 +223,9 @@ Object Interpreter::evaluate_unary(Ast_UnaryExpression* unary) {
 Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
     switch (primary->type_value) {
     case AST_NESTED:  return evaluate_expression(primary->nested);
-    case AST_FLOAT:   return primary->float_const;
-    case AST_STRING:  return primary->string;
+    case AST_FLOAT:   return Object::init_float(primary->float_const);
+    case AST_INT:     return Object::init_int(primary->int_const);
+    case AST_STRING:  return Object::init_str(primary->string);
     case AST_CHAR:    return Object::init_char(primary->char_const);
     case AST_BOOLEAN: return Object::init_bool(primary->boolean);
     case AST_ID: {
@@ -334,7 +338,8 @@ Object Interpreter::evaluate_assignment(Ast_Assignment* assign) {
 
 int Interpreter::convert_to_interpreter_type(int ast_type) {
     switch (ast_type) {
-    case AST_FLOAT:   return NUMBER;
+    case AST_FLOAT:   return FLOAT;
+    case AST_INT:     return INT;
     case AST_STRING:  return STRING;
     case AST_BOOLEAN: return BOOLEAN;
     case AST_CHAR:    return CHAR;

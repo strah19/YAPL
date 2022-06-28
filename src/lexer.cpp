@@ -47,7 +47,8 @@ static std::map<std::string, int> keywords = {
     { "or", Tok::T_OR },
     { "for", Tok::T_FOR },
     { "char", Tok::T_CHAR },
-    { "cast", Tok::T_CAST }
+    { "cast", Tok::T_CAST },
+    { "int", Tok::T_INT }
 };
 
 static std::map<std::string, int> symbols = {
@@ -191,8 +192,8 @@ void Lexer::lex() {
                 }
                 else {
                     if (!num_has_dec) {
-                        tokens.push_back(Token(Tok::T_FLOAT_CONST, current_line));
-                        tokens.back().float_const = atoi(current.c_str());
+                        tokens.push_back(Token(Tok::T_INT_CONST, current_line));
+                        tokens.back().int_const = atoi(current.c_str());
                     }
                     else if (num_has_dec) {
                         tokens.push_back(Token(Tok::T_FLOAT_CONST, current_line));
@@ -292,6 +293,11 @@ void Lexer::print_token(Token& token) {
     }
     case Tok::T_FLOAT_CONST: {
         printf("%f", token.float_const);
+        break;
+    }
+    case Tok::T_INT_CONST: {
+        printf("%d", token.int_const);
+        break;
     }
     default: {
         if (token.type < Tok::T_EOF)
@@ -311,6 +317,10 @@ void Lexer::print_from_type(int type) {
     }
     case Tok::T_FLOAT_CONST: {
         printf("float-const");
+        break;
+    }
+    case Tok::T_INT_CONST: {
+        printf("int-const");
         break;
     }
     case Tok::T_EOF: {

@@ -43,9 +43,10 @@
 
 static std::map<int, int> TYPES  = {
     { Tok::T_FLOAT,   AST_FLOAT   },
+    { Tok::T_INT,     AST_INT     },
     { Tok::T_STRING,  AST_STRING  },
     { Tok::T_BOOLEAN, AST_BOOLEAN },
-    { Tok::T_CHAR,    AST_CHAR }
+    { Tok::T_CHAR,    AST_CHAR    }
 };
 
 static std::map<int, int> SPECIFIERS = {
@@ -460,6 +461,12 @@ Ast_Expression* Parser::primary() {
         prime->float_const = peek()->float_const;
         prime->type_value = AST_FLOAT;
         match(Tok::T_FLOAT_CONST);
+        break;
+    }
+    case Tok::T_INT_CONST: {
+        prime->int_const = peek()->int_const;
+        prime->type_value = AST_INT;
+        match(Tok::T_INT_CONST);
         break;
     }
     case Tok::T_CHAR_CONST: {

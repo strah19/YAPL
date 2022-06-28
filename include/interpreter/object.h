@@ -4,7 +4,8 @@
 #include <map>
 
 enum {
-    NUMBER,
+    FLOAT,
+    INT,
     STRING,
     BOOLEAN,
     CHAR,
@@ -46,14 +47,24 @@ static std::map<int, const char*> OBJ_ERROR_MESSAGES = {
 };
 
 struct Object {
-    Object(double number) : number(number), type(NUMBER), error(OBJ_ERROR_NONE) { }
-    Object(const char* str) : str(str), type(STRING), error(OBJ_ERROR_NONE) { }
-
     static Object init_bool(bool boolean) {
         Object obj;
         obj.boolean = boolean;
         obj.type = BOOLEAN;
-        obj.error = OBJ_ERROR_NONE; 
+        return obj;    
+    }
+
+    static Object init_float(float float_const) {
+        Object obj;
+        obj.float_const = float_const;
+        obj.type = FLOAT;
+        return obj;    
+    }
+
+    static Object init_int(int int_const) {
+        Object obj;
+        obj.int_const = int_const;
+        obj.type = INT;
         return obj;    
     }
 
@@ -61,15 +72,22 @@ struct Object {
         Object obj;
         obj.char_const = char_const;
         obj.type = CHAR;
-        obj.error = OBJ_ERROR_NONE; 
         return obj;
+    }
+
+    static Object init_str(const char* str) {
+        Object obj;
+        obj.str = str;
+        obj.type = STRING;
+        return obj;    
     }
 
     Object(int error) : error(error) { }
     Object() { }
 
     union {
-        double number;
+        float float_const;
+        int int_const;
         const char* str;
         char char_const;
         bool boolean;

@@ -71,6 +71,7 @@ enum {
 
 enum {
     AST_FLOAT,
+    AST_INT,
     AST_BOOLEAN,
     AST_STRING,
     AST_NESTED,
@@ -126,15 +127,16 @@ struct Ast_PrimaryExpression : public Ast_Expression {
     int type_value = AST_TYPE_NONE;
 
     union {
-        _number float_const;
+        int         int_const;
+        float       float_const;
         const char* ident;
         const char* string;
-        char char_const;
-        bool boolean;
+        char        char_const;
+        bool        boolean;
         
         Ast_FunctionCall* call;
-        Ast_Expression* nested;
-        Ast_Cast cast;
+        Ast_Expression*   nested;
+        Ast_Cast          cast;
     };
 };
 

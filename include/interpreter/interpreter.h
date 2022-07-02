@@ -35,7 +35,7 @@ private:
     void   variable_decleration(Ast_VarDecleration* decleration);
     void   function_decleration(Ast_FuncDecleration* func);
 
-    void if_statement(Ast_IfStatement* conditional);
+    void if_statement(Ast_ConditionalStatement* conditional);
     bool conditional_statement(Ast_ConditionalStatement* conditional);
 
     void while_loop(Ast_WhileLoop* loop);   

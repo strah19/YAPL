@@ -1,0 +1,10 @@
+</
+    Array syntax ideas
+
+    - Dynamic or static or both?
+
+    foo : float[5];    //static
+    foo : float[];     //Dynamic
+
+    foo : float[5] = { 1, 2, 3, 4, 5 };
+/>

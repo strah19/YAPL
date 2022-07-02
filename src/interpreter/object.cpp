@@ -307,6 +307,17 @@ int Object::check_divide_by_zero(const Object& obj) {
 
 int Object::check_operators(Object& obj) {
     if (this->type == obj.type) return OBJ_ERROR_NONE;
+
+    //Auto conversion here
+    return auto_convert(obj);
+}
+
+int Object::auto_convert(Object& obj) {
+    if (this->type == FLOAT && obj.type == INT) {
+        obj.type = FLOAT;
+        obj.float_const = (float) obj.int_const;
+        return OBJ_ERROR_NONE;
+    }
     return OBJ_ERROR_MUST_BE_NUMBERS;
 }
 

@@ -45,7 +45,7 @@ void Interpreter::execute(Ast_Decleration* decleration) {
     else if (decleration->type == AST_VAR_DECLERATION) 
         variable_decleration(AST_CAST(Ast_VarDecleration, decleration));
     else if (decleration->type == AST_IF) 
-        if_statement(AST_CAST(Ast_IfStatement, decleration));
+        if_statement(AST_CAST(Ast_ConditionalStatement, decleration));
     else if (decleration->type == AST_WHILE)
         while_loop(AST_CAST(Ast_WhileLoop, decleration)); 
     else if (decleration->type == AST_FUNC_DECLERATION) 
@@ -69,6 +69,7 @@ void Interpreter::scope(Ast_Decleration* decleration) {
         execute(scope->declerations[i]);
     current_environment = current_environment->previous;
     delete current_environment->next;
+    current_environment->next = nullptr;
 }
 
 void Interpreter::while_loop(Ast_WhileLoop* loop) {
@@ -76,20 +77,21 @@ void Interpreter::while_loop(Ast_WhileLoop* loop) {
     OBJECT_ERRORS(loop, obj);
 
     while (obj.type == BOOLEAN && obj.boolean) {
-         execute(loop->scope);
+        execute(loop->scope);
 
         obj = evaluate_expression(loop->condition);
         OBJECT_ERRORS(loop, obj);
     }
 }
 
-void Interpreter::if_statement(Ast_IfStatement* conditional) {
+void Interpreter::if_statement(Ast_ConditionalStatement* conditional) {
     Ast_ConditionalStatement* current = conditional;
     while (current) {
-        if (is_if_or_elif(current->type) && conditional_statement(current))
-            break;
-        else if (current->type == AST_ELSE) {
-            execute(conditional->scope);
+        if (is_if_or_elif(current->type)) 
+            if (conditional_statement(current)) 
+                break;
+        if (current->type == AST_ELSE) {
+            execute(current->scope);
             break;
         }
         current = current->next;
@@ -108,6 +110,7 @@ bool Interpreter::conditional_statement(Ast_ConditionalStatement* conditional) {
         execute(conditional->scope);
         return true;
     }
+
     return false;
 }
 
@@ -249,7 +252,7 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
     }
     case AST_INPUT: {
         Object obj;
-        obj.type = primary->input_type;
+        obj.type = convert_to_interpreter_type(primary->input_type);
         switch (primary->input_type) {
         case AST_FLOAT: {
             std::cin >> obj.float_const;
@@ -316,7 +319,7 @@ Object Interpreter::execute_function(Ast_FuncDecleration* function, Ast_Function
                 return Object(OBJ_ERROR_NONE);
             else if (ret->expression) {
                 Object obj_return = evaluate_expression(ret->expression);
-                if (obj_return.type != function->return_type) 
+                if (obj_return.type != convert_to_interpreter_type(function->return_type))
                     return Object(OBJ_ERROR_WRONG_RET_TYPE);
                 OBJECT_ERRORS(ret->expression, obj_return);
                 return obj_return;

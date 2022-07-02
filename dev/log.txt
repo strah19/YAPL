@@ -20,3 +20,9 @@
 - Casts work between types.
 ***6/30/2022***
 - Inputs work (need to figure out new line stuff).
+***7/2/2022***
+- Fixed the \n problems, will have to add stuff like \b and \t, etc.
+- Fixed a conditional bug: was not executing correct code for else and elifs.
+- Fixed a type conversion issue between parser and interpreter.
+- Added a redefintion error for variables (need to do it for functions).
+- Some kind of bug found related to the construction of variables in loops.

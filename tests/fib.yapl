@@ -1,0 +1,27 @@
+print "Enter 'nth' term of fibonacci series: ";
+n    : int = input(int);
+
+t1   : int = 0;
+t2   : int = 1;
+next : int = 0;
+i    : int = 1;
+
+print "fibonacci series: ";
+
+while i <= n {    
+    if (i == 1) {
+        print t1, ", ";
+    }
+    elif (i == 2) {
+        print t2;
+    }
+    else {
+        next = t1 + t2;
+        t1 = t2;
+        t2 = next;
+
+        print ", ", next;
+    }
+    i = i + 1;
+}
+

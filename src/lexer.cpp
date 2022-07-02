@@ -209,12 +209,15 @@ void Lexer::lex() {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
                 current.erase(0, 1);
 
-                //temp
                 for (int i = 0; i < current.size(); i++) {
                     if (current[i] == '\\' && i != current.size() - 1) {
                         if (current[i + 1] == 'n') {
                             current.erase(i, 2);
                             current.insert(i, "\n");
+                        }
+                        else if (current[i + 1] == '\\') {
+                            current.erase(i, 2);
+                            current.insert(i, "\\");
                         }
                     }
                 }
@@ -234,8 +237,17 @@ void Lexer::lex() {
                 if (current.size() == 1) {
                     if (current[0] == '\'') {
                         move();
+
+                        char character = stream[current_index];
+                        if (stream[current_index] == '\\') {
+                            if (stream[current_index + 1] == 'n') {
+                                character = '\n';
+                                move();
+                            }
+                        }
+
                         tokens.push_back(Token(Tok::T_CHAR_CONST, current_line));
-                        tokens.back().char_const = stream[current_index];
+                        tokens.back().char_const = character;
 
                         reset();
                         move();

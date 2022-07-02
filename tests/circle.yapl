@@ -11,6 +11,8 @@
 />
 
 PI : constant float = 3.14159;  //Constant PI 
+MIN : constant float = 0.0;
+MAX : constant float = 100.0;
 
 </ Will find area of a circle with given radius />
 area : func(r: float) -> float { 
@@ -19,11 +21,38 @@ area : func(r: float) -> float {
 
 </ Will find circumference of a circle with given radius />
 circ : func(r: float) -> float {
-    return (PI * (r * 2.0));
+    return (PI * (r * 2));
 }
 
-print "Please enter radius of circle: ";
-radius : float = input(float);
+get_radius : func() -> float {
+    print "Please enter radius of circle: ";
+    return input(float);
+}
 
-print "Area of circle with radius ", radius, " is ", area(radius), ".\n";
-print "Circumference of circle with radius ", radius, " is ", circ(radius), '.';
+input_good : func(r: float) -> boolean {
+    return (r > MIN and r < MAX);
+}
+
+radius : float = get_radius();
+cont : boolean = true;
+
+while cont {
+    print "Radius entered is ", radius, '\n';
+
+    if input_good(radius) {
+        print "Area of circle with radius ", radius, " is ", area(radius), '\n';
+        print "Circumference of circle with radius ", radius, " is ", circ(radius), '\n';
+    } 
+    else {
+        print "Radius must be between ", MIN, " and ", MAX, '\n';
+    }
+
+    print "Would you like to do another calculation (y/n)? ";
+    yes : char = input(char);
+    if yes != 'y' {
+        cont = false;
+    }
+    else {
+        radius = get_radius();
+    }
+}

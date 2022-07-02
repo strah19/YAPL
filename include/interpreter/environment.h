@@ -23,10 +23,10 @@ struct Environment {
     Environment() = default;
     ~Environment() = default;
 
-    int var_is_defined(const char* name);
-    void var_define(const char* name, Object object);
-    int var_update(const char* name, Object object);
-    bool var_found(const char* name);
+    int    var_is_defined(const char* name);
+    void   var_define(const char* name, Object object);
+    int    var_update(const char* name, Object object);
+    bool   var_found(const char* name);
     Object var_get(const char* name);
 
     int func_is_defined(const char* name);

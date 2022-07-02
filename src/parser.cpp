@@ -484,13 +484,15 @@ Ast_Expression* Parser::primary() {
             std::vector<Ast_Expression*> args;
             consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
 
-            if (!match(Tok::T_RPAR)) {
+            if (!check(Tok::T_RPAR)) {
                 args.push_back(expression());
                 while (match(Tok::T_COMMA)) {
                     args.push_back(expression());
                 }
                 consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
             }
+            else 
+                consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
             prime->call = new Ast_FunctionCall(ident, args);
         }
         else {
@@ -537,6 +539,7 @@ Ast_Expression* Parser::primary() {
         break;
     }
     default:
+    printf("OH NO: %d\n", peek()->type);
         parser_error(peek(), UNKNOWN_TOKEN);
     }
 

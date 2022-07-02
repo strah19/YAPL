@@ -17,6 +17,7 @@
 
 #include "interpreter.h"
 #include "err.h"
+#include <iostream>
 
 #define OBJECT_ERRORS(ast, obj) if (obj.found_errors()) throw Interpreter::construct_runtime_error(*ast, OBJ_ERROR_MESSAGES[obj.error]);
 #define ENVIRONMENT_ERRORS(ast, err) if (Environment::found_errors(err)) throw Interpreter::construct_runtime_error(*ast, EN_ERROR_MESSAGES[err]);
@@ -154,7 +155,6 @@ void Interpreter::print_statement(Ast_PrintStatement* print) {
             printf("(null)");
         }
     }
-    printf("\n");
 }
 
 Object Interpreter::assignment(Ast_Assignment* assign) {
@@ -246,7 +246,35 @@ Object Interpreter::evaluate_primary(Ast_PrimaryExpression* primary) {
         int errors = obj.convert(casting_obj);
         OBJECT_ERRORS(primary, Object(errors));
         return obj;
-        break;
+    }
+    case AST_INPUT: {
+        Object obj;
+        obj.type = primary->input_type;
+        switch (primary->input_type) {
+        case AST_FLOAT: {
+            std::cin >> obj.float_const;
+            break;
+        }
+        case AST_INT: {
+            std::cin >> obj.int_const;
+            break;
+        }
+        case AST_CHAR: {
+            std::cin >> obj.char_const;
+            break;
+        }
+        case AST_STRING: {
+            std::string temp;
+            std::cin >> temp;
+            obj.str = temp.c_str();
+            break;
+        }
+        case AST_BOOLEAN: {
+            std::cin >> obj.boolean;
+            break;
+        }
+        }
+        return obj;
     }
     default: return Object(OBJ_ERROR_UNKNOWN_TYPE);
     }

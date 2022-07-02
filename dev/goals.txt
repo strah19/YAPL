@@ -7,8 +7,8 @@
 
 6/19/2022 : 'Added bit operators (&, |, ~, ^)' : 6/20/2022
 6/19/2022 : 'Finish for loops' : n/a
-6/19/2022 : 'Added an input function, similiar to print but gives access to stdin' : n/a
-6/19/2022 : 'Add new type of char' : n/a
+6/19/2022 : 'Added an input function, similiar to print but gives access to stdin' : (IP)
+6/19/2022 : 'Add new type of char' : 6/28/2022
 6/19/2022 : 'Add arrays' : n/a
 6/19/2022 : 'Think about pointers and how we want them to work in our language' : n/a
 

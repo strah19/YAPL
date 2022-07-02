@@ -528,6 +528,14 @@ Ast_Expression* Parser::primary() {
         match(Tok::T_STRING_CONST);
         break;
     }
+    case Tok::T_INPUT: {
+        prime->type_value = AST_INPUT;
+        match(Tok::T_INPUT);
+        consume(Tok::T_LPAR, EXPECTED_LEFT_PAR);
+        prime->input_type = type();
+        consume(Tok::T_RPAR, EXPECTED_RIGHT_PAR);
+        break;
+    }
     default:
         parser_error(peek(), UNKNOWN_TOKEN);
     }

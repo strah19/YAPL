@@ -76,6 +76,7 @@ enum {
     AST_STRING,
     AST_NESTED,
     AST_CHAR,
+    AST_INPUT,
     AST_ID,
     AST_CAST,
     AST_FUNC_CALL,
@@ -133,6 +134,7 @@ struct Ast_PrimaryExpression : public Ast_Expression {
         const char* string;
         char        char_const;
         bool        boolean;
+        int         input_type;
         
         Ast_FunctionCall* call;
         Ast_Expression*   nested;

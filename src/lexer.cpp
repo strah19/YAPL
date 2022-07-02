@@ -48,7 +48,8 @@ static std::map<std::string, int> keywords = {
     { "for", Tok::T_FOR },
     { "char", Tok::T_CHAR },
     { "cast", Tok::T_CAST },
-    { "int", Tok::T_INT }
+    { "int", Tok::T_INT },
+    { "input", Tok::T_INPUT }
 };
 
 static std::map<std::string, int> symbols = {
@@ -207,6 +208,17 @@ void Lexer::lex() {
             else if (stream[current_index] == '"' && current_type == STRING) {
                 tokens.push_back(Token(Tok::T_STRING_CONST, current_line));
                 current.erase(0, 1);
+
+                //temp
+                for (int i = 0; i < current.size(); i++) {
+                    if (current[i] == '\\' && i != current.size() - 1) {
+                        if (current[i + 1] == 'n') {
+                            current.erase(i, 2);
+                            current.insert(i, "\n");
+                        }
+                    }
+                }
+
                 tokens.back().string = new char[current.length() + 1];
                 strcpy(tokens.back().string, current.c_str());
 
@@ -275,35 +287,28 @@ void Lexer::print_token(Token& token) {
     log_keywords_symbols(token.type);
 
     switch (token.type) {
-    case Tok::T_IDENTIFIER: {
+    case Tok::T_IDENTIFIER: 
         printf("%s", token.identifier);
         break;
-    }
-    case Tok::T_EOF: {
+    case Tok::T_EOF: 
         printf("EOF");
         break;
-    }
-    case Tok::T_STRING_CONST: {
+    case Tok::T_STRING_CONST: 
         printf("%s", token.string);
         break;
-    }
-    case Tok::T_CHAR_CONST: {
+    case Tok::T_CHAR_CONST: 
         printf("%c", token.char_const);
         break;
-    }
-    case Tok::T_FLOAT_CONST: {
+    case Tok::T_FLOAT_CONST: 
         printf("%f", token.float_const);
         break;
-    }
-    case Tok::T_INT_CONST: {
+    case Tok::T_INT_CONST: 
         printf("%d", token.int_const);
         break;
-    }
-    default: {
+    default: 
         if (token.type < Tok::T_EOF)
             printf("%c", token.type);
         break;
-    }
     }
 }
 
@@ -311,27 +316,22 @@ void Lexer::print_from_type(int type) {
     log_keywords_symbols(type);
 
     switch (type) {
-    case Tok::T_IDENTIFIER: {
+    case Tok::T_IDENTIFIER: 
         printf("identifier");
         break;
-    }
-    case Tok::T_FLOAT_CONST: {
+    case Tok::T_FLOAT_CONST: 
         printf("float-const");
         break;
-    }
-    case Tok::T_INT_CONST: {
+    case Tok::T_INT_CONST: 
         printf("int-const");
         break;
-    }
-    case Tok::T_EOF: {
+    case Tok::T_EOF: 
         printf("EOF");
         break;
-    }
-    default: {
+    default: 
         if (type < Tok::T_EOF)
             printf("%c", type);
         break;
-    }
     }
 }
 
@@ -343,9 +343,8 @@ void Lexer::load() {
     struct stat sb{};
 
     FILE* input_file = fopen(filepath, "r");
-    if (input_file == nullptr) {
-        perror("fopen");
-    }
+    if (!input_file)
+        fatal_error("Unable to open file '%s'.\n", filepath);
 
     stat(filepath, &sb);
     stream.resize(sb.st_size);

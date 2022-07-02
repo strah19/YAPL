@@ -14,3 +14,9 @@
 ***6/25/2022***
 - Added a cast keyword.
 - Casts work with chars and numbers.
+***6/28/2022***
+- Added ints
+- All operands work with correct types.
+- Casts work between types.
+***6/30/2022***
+- Inputs work (need to figure out new line stuff).

@@ -26,3 +26,8 @@
 - Fixed a type conversion issue between parser and interpreter.
 - Added a redefintion error for variables (need to do it for functions).
 - Some kind of bug found related to the construction of variables in loops.
+***7/3/2022***
+- Fixed above issue from 7/2/2022 (^^^).
+- Added scope file for scope tests and what not.
+***7/4/2022***
+- Began simple checks for arrays.

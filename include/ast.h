@@ -126,6 +126,7 @@ struct Ast_PrimaryExpression : public Ast_Expression {
     Ast_PrimaryExpression(char char_const) : char_const(char_const), type_value(AST_CHAR) { type = AST_PRIMARY; }
     
     int type_value = AST_TYPE_NONE;
+    int array_size = -1;
 
     union {
         int         int_const;

@@ -13,4 +13,5 @@
 6/19/2022 : 'Think about pointers and how we want them to work in our language' : n/a
 7/2/2022  : 'Created a VS-Code extension for syntax highlightning' : n/a
 7/2/2022  : 'Add back the control flow controllers like break, continue, etc.' : n/a
+7/3/2022  : 'Default values for function parameters' : n/a
 

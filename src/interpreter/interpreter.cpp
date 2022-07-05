@@ -115,6 +115,8 @@ bool Interpreter::conditional_statement(Ast_ConditionalStatement* conditional) {
 }
 
 void Interpreter::variable_decleration(Ast_VarDecleration* decleration) {
+    if (current_environment->var_found(decleration->ident)) 
+        throw construct_runtime_error(*decleration, OBJ_ERROR_MESSAGES[OBJ_ERROR_REDEFINITION]);
     current_environment->var_define(decleration->ident, Object());
     if (decleration->expression) {
         Object obj;

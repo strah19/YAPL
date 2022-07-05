@@ -33,10 +33,10 @@ input_good : func(r: float) -> boolean {
     return (r > MIN and r < MAX);
 }
 
-radius : float = get_radius();
 cont : boolean = true;
 
 while cont {
+    radius : float = get_radius();  
     print "Radius entered is ", radius, '\n';
 
     if input_good(radius) {
@@ -51,8 +51,5 @@ while cont {
     yes : char = input(char);
     if yes != 'y' {
         cont = false;
-    }
-    else {
-        radius = get_radius();
     }
 }

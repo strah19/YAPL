@@ -16,14 +16,20 @@
  */
 
 #include <stdio.h>
-#include "config.h"
+#include "../config.h"
 #include "lexer.h"
 #include "parser.h"
 #include "bench.h"
 #include "err.h"
 #include "interpreter.h"
 
+// If USE_VM is defined, YAPL will use the VM otherwise it will use the interpreter.
+#ifdef USE_VM
+    #include "vm.h"
+#endif
+
 int main(int argc, char* argv[]) {
+    printf("USING YAPL VERSION %d.%d\n", YAPL_VERSION_MAJOR, YAPL_VERSION_MINOR);
     if (!argv[1])
         fatal_error("no input file found.\n");
     Lexer lex(argv[1]);
@@ -39,8 +45,12 @@ int main(int argc, char* argv[]) {
     Parser parser(&lex);
     parser.parse();
 
+#ifdef USE_VM
+    vm::run();
+#else
     Interpreter interpreter;
     interpreter.interpret(parser.translation_unit());
-   
+#endif
+
     return 0;
 }

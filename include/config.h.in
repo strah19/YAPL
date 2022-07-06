@@ -1,3 +1,4 @@
 // the configured options and settings for YAPL
 #define YAPL_VERSION_MAJOR @YAPL_VERSION_MAJOR@
 #define YAPL_VERSION_MINOR @YAPL_VERSION_MINOR@
+#cmakedefine USE_VM

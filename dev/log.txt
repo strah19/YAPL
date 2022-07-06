@@ -31,3 +31,32 @@
 - Added scope file for scope tests and what not.
 ***7/4/2022***
 - Began simple checks for arrays.
+***7/5/2022***
+- Added virtual machine as a library.
+- Fixed config files.
+- Added tests
+- Made vm directory "official".
+- The scanner can stay the same (with updates and improvements of course), the parser/actual compiler is what needs to 
+  change. It is what needs to be able to take the tokens and convert it to bytecode for the virtual machine (that is yet
+  to be even made).
+
+  Lexer -> Parser -> Ast -> Interpreter
+    |
+    v
+  Compiler -> Bytecode -> Virtual Machine
+- To read a file in C:
+
+  FILE* file = fopen(path, "rb");
+
+  fseek(file, 0L, SEEK_END);
+  size_t fileSize = ftell(file);
+  rewind(file);
+
+  char* buffer = (char*)malloc(fileSize + 1);
+  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+  buffer[bytesRead] = '\0';
+
+  fclose(file);
+  return buffer;
+- Thinking about moving to only C (for speed).
+- New Language??? (call it Polaris).
